@@ -29,8 +29,11 @@ void logResults(struct latencies *l);
 FILE *openLogFile(char *pszFileName, char *mode);
 
 void logPressureData(struct TestParams params, struct PressureData *data, unsigned int length);
+
 void logStepperLatencyData(struct TestParams params, long long* result, unsigned int length);
+
 void logStepperModeData(struct TestParams params, struct StepperModeResult *data, unsigned int length);
+
 void logAutoModeData(struct TestParams params, struct AutoModeData *data, unsigned int length);
 
 /*

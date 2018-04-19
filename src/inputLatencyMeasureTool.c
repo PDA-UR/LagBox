@@ -43,9 +43,6 @@
 #include "stepper.h"
 #include "fileLog.h"
 
-//#include "mathTools.h"
-//#include "fileLog.h"
-
 enum INPUT_DEVICES inputDevice;
 
 struct MenuIdRelName inputDeviceNames[3] = {
