@@ -14,7 +14,7 @@ LagBox can be used with different modes. While stepper mode and auto mode are us
 | -tmax   | maximum delay time in microseconds for auto mode |
 | -n      | number of test iterations |
 | -b      | button code from input event (find out with evtest) |
-| -d      | device type (0 = gamepad, 1 = mouse, 2 = keyboard) |
+| -d      | device type (1 = gamepad, 2 = mouse, 3 = keyboard) |
 | -steps  | number of steps to test in stepper latency test mode |
 | -delay  | delay between tests in stepper mode and stepper latency test mode |
 | -dir    | direction to drive in stepper reset mode (1 (default) = up, -1 = down) |
