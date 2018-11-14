@@ -923,11 +923,23 @@ int main(int argc, char *argv[])
 
 			struct PressureData* pData = (void*)malloc(1000000 * sizeof(struct PressureData));
 
+			start();
+			initializeStepper(200, 6, 5);
+			setStepperRPM(sm_RPM);
+			
 			printf("starting thread\n");
 
 			pthread_t pThread = startPressureMeasurement(pData);
 
-			usleep(3000000);
+
+			for(int i = 0; i < g_testIterations;i++ ) {
+				rotateStepper(10*direction);
+			}
+
+			//while(1)
+			//{
+			//	rotateStepper(10 * direction);
+			//}
 
 			printf("ending thread\n");
 
