@@ -158,16 +158,21 @@
       <x>270</x>
       <y>300</y>
       <width>251</width>
-      <height>33</height>
+      <height>41</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
     </property>
    </widget>
    <widget class="QPushButton" name="button_start_measurement">
     <property name="geometry">
      <rect>
-      <x>260</x>
+      <x>190</x>
       <y>490</y>
-      <width>231</width>
+      <width>421</width>
       <height>41</height>
      </rect>
     </property>
