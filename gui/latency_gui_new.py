@@ -42,10 +42,15 @@ class LatencyGUI(QtWidgets.QMainWindow):
 
     # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
     def start_measurement(self):
-        command = 'ls'
+        command = 'ping google.com -c 5'
         process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
-        output = process.stdout.readline()
-        print(output)
+
+        for line in iter(process.stdout.readline, ''):
+            if len(line) is 0:
+                break
+            print(line)
+
+        print("Reached end of loop")
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
