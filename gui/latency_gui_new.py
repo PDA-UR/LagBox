@@ -3,9 +3,10 @@
 
 from PyQt5 import QtWidgets, uic
 import sys
+from subprocess import Popen, PIPE, STDOUT
 
 class Constants:
-    DEVICE_TYPES = ["Mouse", "Keyboard", "Gamepad"]
+    DEVICE_TYPES = ["Gamepad", "Mouse", "Keyboard"]
 
 
 class LatencyGUI(QtWidgets.QMainWindow):
@@ -36,6 +37,15 @@ class LatencyGUI(QtWidgets.QMainWindow):
         print("Authors: ", authors)
         print("Device name: ", device_name)
         print("Device type: ", device_type)
+
+        self.start_measurement()
+
+    # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
+    def start_measurement(self):
+        command = 'ls'
+        process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+        output = process.stdout.readline()
+        print(output)
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
