@@ -27,6 +27,7 @@ class LatencyGUI(QtWidgets.QMainWindow):
         self.show()
         self.init_combobox_device_type()
         self.ui.button_next.clicked.connect(self.on_measurement_started_button_pressed)
+        self.ui.button_refresh.clicked.connect(self.get_connected_devices)
         self.get_connected_devices()
 
     def init_combobox_device_type(self):
@@ -34,6 +35,7 @@ class LatencyGUI(QtWidgets.QMainWindow):
         self.ui.comboBox_device_type.setCurrentIndex(0)
 
     def init_combobox_device(self, devices):
+        self.ui.comboBox_device.clear()
         self.ui.comboBox_device.addItems(devices)
         self.ui.comboBox_device_type.setCurrentIndex(0)
 
