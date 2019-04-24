@@ -38,7 +38,47 @@ class LatencyGUI(QtWidgets.QMainWindow):
         print("Device name: ", device_name)
         print("Device type: ", device_type)
 
-        self.start_measurement()
+        #self.start_measurement()
+
+    def get_connected_devices(self):
+        lines = []
+
+        command = 'cat /proc/bus/input/devices'
+        process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+        empty_lines = 0
+        for line in iter(process.stdout.readline, ''):
+            if len(line) is 0:
+                empty_lines += 1
+                if empty_lines > 3:
+                    break
+            else:
+                empty_lines = 0
+                lines.append(line.decode("utf-8").replace('\n', ''))
+
+        devices = []
+
+        current_device = []
+        for i in range(len(lines)):
+            if len(lines[i]) > 0:
+                current_device.append(lines[i])
+            else:
+                devices.append(current_device.copy())
+                current_device.clear()
+
+        print(devices)
+        self.extract_relevant_devices(devices)
+
+    def extract_relevant_devices(self, devices):
+        device_names = []
+        for device in devices:
+            if 'usb' in device[2]:  # Only accept devices if they are listed as usb devices
+                vendor_id = device[0].split(' ')[2].replace('Vendor=', '')
+                product_id = device[0].split(' ')[3].replace('Product=', '')
+                name = device[1].replace('"', '').replace('N: Name=', '')
+                device_names.append(name)
+                self.device_objects.append(Device(vendor_id, product_id, name))
+
+        self.init_combobox_device(device_names)
 
     # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
     def start_measurement(self):
