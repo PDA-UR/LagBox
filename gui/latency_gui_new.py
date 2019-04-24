@@ -4,10 +4,13 @@
 from PyQt5 import QtWidgets, uic
 import sys
 from subprocess import Popen, PIPE, STDOUT
-import re
+#import re
+import struct
+import evdev
 
 class Constants:
     DEVICE_TYPES = ["Gamepad", "Mouse", "Keyboard"]
+    WINDOW_TITLE = 'LagBox'
 
 
 class LatencyGUI(QtWidgets.QMainWindow):
@@ -20,9 +23,10 @@ class LatencyGUI(QtWidgets.QMainWindow):
 
     def init_ui(self):
         self.ui = uic.loadUi("latency_gui.ui", self)
+        self.setWindowTitle(Constants.WINDOW_TITLE)
         self.show()
         self.init_combobox_device_type()
-        self.ui.button_start_measurement.clicked.connect(self.on_measurement_started_button_pressed)
+        self.ui.button_next.clicked.connect(self.on_measurement_started_button_pressed)
         self.get_connected_devices()
 
     def init_combobox_device_type(self):
@@ -32,6 +36,8 @@ class LatencyGUI(QtWidgets.QMainWindow):
     def init_combobox_device(self, devices):
         self.ui.comboBox_device.addItems(devices)
         self.ui.comboBox_device_type.setCurrentIndex(0)
+
+        self.get_pressed_button('13')
 
     def on_measurement_started_button_pressed(self):
         print("Starting measurement")
@@ -73,7 +79,7 @@ class LatencyGUI(QtWidgets.QMainWindow):
                 devices.append(current_device.copy())
                 current_device.clear()
 
-        print(devices)
+        # print(devices)
         self.extract_relevant_devices(devices)
 
     def extract_relevant_devices(self, devices):
@@ -83,31 +89,72 @@ class LatencyGUI(QtWidgets.QMainWindow):
                 vendor_id = device[0].split(' ')[2].replace('Vendor=', '')
                 product_id = device[0].split(' ')[3].replace('Product=', '')
                 name = device[1].replace('"', '').replace('N: Name=', '')
+                device_id = self.get_device_id(device[5])
+                # print('Device ID: ', device_id)
                 device_names.append(name)
-                self.device_objects.append(Device(vendor_id, product_id, name))
+                self.device_objects.append(Device(vendor_id, product_id, name, device_id))
 
         self.init_combobox_device(device_names)
 
+    def get_device_id(self, line):
+        for part in line.split(' '):
+            if 'event' in part:
+                return part
+
+    def get_pressed_button(self, event_id):
+        key_events = []
+
+        try:
+            device = evdev.InputDevice('/dev/input/event' + event_id)
+
+            for event in device.read_loop():
+                if event.type == evdev.ecodes.EV_KEY:
+                    key_event = evdev.categorize(event)
+                    print(key_event)
+                    print(key_event.keystate)
+                    if key_event.keystate:
+                        key_events.append(key_event)
+                    else:
+                        break
+
+            print(key_events)
+        except PermissionError as error:
+            print(error)
+
+        # command = 'evtest /dev/input/event13 | grep EV_KEY'
+        # process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+        #
+        # lines = []
+        #
+        # for line in iter(process.stdout.readline, ''):
+        #     print(line)
+        #     lines.append(line)
+        #     if len(lines) > 3:
+        #         break
+        # print(lines)
+
+
     # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
     def start_measurement(self):
-        command = 'ping google.com -c 5'
-        process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+        pass
+        # command = 'ping google.com -c 5'
+        # process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+        #
+        # for line in iter(process.stdout.readline, ''):
+        #     if len(line) is 0:
+        #         break
+        #     print(line)
+        #
+        # print("Reached end of loop")
 
-        for line in iter(process.stdout.readline, ''):
-            if len(line) is 0:
-                break
-            print(line)
 
-        print("Reached end of loop")
+class Device:
 
-
-
-class Device():
-
-    def __init__(self, vendor_id, product_id, name):
+    def __init__(self, vendor_id, product_id, name, device_id):
         self.vendor_id = vendor_id
         self.product_id = product_id
         self.name = name
+        self.device_id = device_id
 
 
 def main():
