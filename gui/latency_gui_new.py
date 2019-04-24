@@ -4,12 +4,15 @@
 from PyQt5 import QtWidgets, uic
 import sys
 from subprocess import Popen, PIPE, STDOUT
+import re
 
 class Constants:
     DEVICE_TYPES = ["Gamepad", "Mouse", "Keyboard"]
 
 
 class LatencyGUI(QtWidgets.QMainWindow):
+
+    device_objects = []
 
     def __init__(self):
         super().__init__()
@@ -18,11 +21,16 @@ class LatencyGUI(QtWidgets.QMainWindow):
     def init_ui(self):
         self.ui = uic.loadUi("latency_gui.ui", self)
         self.show()
-        self.init_combobox()
+        self.init_combobox_device_type()
         self.ui.button_start_measurement.clicked.connect(self.on_measurement_started_button_pressed)
+        self.get_connected_devices()
 
-    def init_combobox(self):
+    def init_combobox_device_type(self):
         self.ui.comboBox_device_type.addItems(Constants.DEVICE_TYPES)
+        self.ui.comboBox_device_type.setCurrentIndex(0)
+
+    def init_combobox_device(self, devices):
+        self.ui.comboBox_device.addItems(devices)
         self.ui.comboBox_device_type.setCurrentIndex(0)
 
     def on_measurement_started_button_pressed(self):
