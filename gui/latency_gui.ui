@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>629</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -60,7 +60,7 @@
     <property name="geometry">
      <rect>
       <x>270</x>
-      <y>394</y>
+      <y>424</y>
       <width>491</width>
       <height>41</height>
      </rect>
@@ -81,7 +81,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>394</y>
+      <y>424</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -99,7 +99,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>314</y>
+      <y>334</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -117,7 +117,7 @@
     <property name="geometry">
      <rect>
       <x>270</x>
-      <y>314</y>
+      <y>334</y>
       <width>491</width>
       <height>41</height>
      </rect>
@@ -138,7 +138,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>154</y>
+      <y>160</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -156,7 +156,7 @@
     <property name="geometry">
      <rect>
       <x>270</x>
-      <y>154</y>
+      <y>160</y>
       <width>251</width>
       <height>41</height>
      </rect>
@@ -171,7 +171,7 @@
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>500</y>
+      <y>530</y>
       <width>421</width>
       <height>41</height>
      </rect>
@@ -189,7 +189,7 @@
     <property name="geometry">
      <rect>
       <x>270</x>
-      <y>234</y>
+      <y>250</y>
       <width>391</width>
       <height>41</height>
      </rect>
@@ -204,7 +204,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>234</y>
+      <y>250</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -222,7 +222,7 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>200</y>
+      <y>206</y>
       <width>741</width>
       <height>21</height>
      </rect>
@@ -235,7 +235,7 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>280</y>
+      <y>296</y>
       <width>741</width>
       <height>21</height>
      </rect>
@@ -248,7 +248,7 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>360</y>
+      <y>380</y>
       <width>741</width>
       <height>31</height>
      </rect>
@@ -262,21 +262,22 @@ Therefore it can be changed here</string>
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>440</y>
+      <y>470</y>
       <width>741</width>
-      <height>31</height>
+      <height>51</height>
      </rect>
     </property>
     <property name="text">
-     <string>(Optional) After taking the measurement you will be asked if you want to upload the results. If you want your name(s) to appear on the 
-results page, please insert them here.</string>
+     <string>(Optional) After taking the measurement you will be asked if you want to upload the results. 
+If you want your name(s) to appear on the results page, 
+please insert them here.</string>
     </property>
    </widget>
    <widget class="QPushButton" name="button_refresh">
     <property name="geometry">
      <rect>
       <x>670</x>
-      <y>234</y>
+      <y>250</y>
       <width>91</width>
       <height>41</height>
      </rect>

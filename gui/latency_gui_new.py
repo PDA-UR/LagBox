@@ -54,7 +54,7 @@ class LatencyGUI(QtWidgets.QMainWindow):
         print("Device name: ", device_name)
         print("Device type: ", device_type)
 
-        #self.start_measurement()
+        self.start_measurement()
 
     def get_connected_devices(self):
         lines = []
@@ -104,7 +104,6 @@ class LatencyGUI(QtWidgets.QMainWindow):
                 return part
 
     def get_pressed_button(self, event_id):
-        key_events = []
 
         try:
             device = evdev.InputDevice('/dev/input/event' + event_id)
@@ -112,14 +111,11 @@ class LatencyGUI(QtWidgets.QMainWindow):
             for event in device.read_loop():
                 if event.type == evdev.ecodes.EV_KEY:
                     key_event = evdev.categorize(event)
-                    print(key_event)
-                    print(key_event.keystate)
                     if key_event.keystate:
-                        key_events.append(key_event)
-                    else:
+                        button_code = key_event.scancode
+                        print('ID of pressed button:_', button_code)
                         break
 
-            print(key_events)
         except PermissionError as error:
             print(error)
 
@@ -138,7 +134,7 @@ class LatencyGUI(QtWidgets.QMainWindow):
 
     # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
     def start_measurement(self):
-        pass
+        self.get_pressed_button('13')
         # command = 'ping google.com -c 5'
         # process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
         #
