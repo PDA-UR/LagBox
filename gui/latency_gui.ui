@@ -42,7 +42,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>130</y>
+      <y>104</y>
       <width>281</width>
       <height>31</height>
      </rect>
@@ -60,7 +60,7 @@
     <property name="geometry">
      <rect>
       <x>270</x>
-      <y>200</y>
+      <y>394</y>
       <width>491</width>
       <height>41</height>
      </rect>
@@ -81,7 +81,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>200</y>
+      <y>394</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -99,7 +99,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>250</y>
+      <y>314</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -117,7 +117,7 @@
     <property name="geometry">
      <rect>
       <x>270</x>
-      <y>250</y>
+      <y>314</y>
       <width>491</width>
       <height>41</height>
      </rect>
@@ -138,7 +138,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>349</y>
+      <y>154</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -149,14 +149,14 @@
      </font>
     </property>
     <property name="text">
-     <string>Device type:</string>
+     <string>Device type*:</string>
     </property>
    </widget>
    <widget class="QComboBox" name="comboBox_device_type">
     <property name="geometry">
      <rect>
       <x>270</x>
-      <y>349</y>
+      <y>154</y>
       <width>251</width>
       <height>41</height>
      </rect>
@@ -167,11 +167,11 @@
      </font>
     </property>
    </widget>
-   <widget class="QPushButton" name="button_start_measurement">
+   <widget class="QPushButton" name="button_next">
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>490</y>
+      <y>500</y>
       <width>421</width>
       <height>41</height>
      </rect>
@@ -182,15 +182,15 @@
      </font>
     </property>
     <property name="text">
-     <string>Start Measurement</string>
+     <string>Next</string>
     </property>
    </widget>
    <widget class="QComboBox" name="comboBox_device">
     <property name="geometry">
      <rect>
       <x>270</x>
-      <y>300</y>
-      <width>491</width>
+      <y>234</y>
+      <width>391</width>
       <height>41</height>
      </rect>
     </property>
@@ -204,7 +204,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>300</y>
+      <y>234</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -215,7 +215,79 @@
      </font>
     </property>
     <property name="text">
-     <string>Device:</string>
+     <string>Device*:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>200</y>
+      <width>741</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Select the kind of device yout want to use for measurements.</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>280</y>
+      <width>741</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Select the device yout want to use for measurements.</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>360</y>
+      <width>741</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>(Optional) The device name provided by the hardware does not always represent the the actual name. 
+Therefore it can be changed here</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>440</y>
+      <width>741</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>(Optional) After taking the measurement you will be asked if you want to upload the results. If you want your name(s) to appear on the 
+results page, please insert them here.</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_refresh">
+    <property name="geometry">
+     <rect>
+      <x>670</x>
+      <y>234</y>
+      <width>91</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Refresh</string>
     </property>
    </widget>
   </widget>
