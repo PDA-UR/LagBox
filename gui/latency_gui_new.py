@@ -52,6 +52,16 @@ class LatencyGUI(QtWidgets.QMainWindow):
 
         print("Reached end of loop")
 
+
+
+class Device():
+
+    def __init__(self, vendor_id, product_id, name):
+        self.vendor_id = vendor_id
+        self.product_id = product_id
+        self.name = name
+
+
 def main():
     app = QtWidgets.QApplication(sys.argv)
     latencyGUI = LatencyGUI()
