@@ -6,6 +6,7 @@ import sys
 from subprocess import Popen, PIPE, STDOUT
 import struct
 import evdev
+import os
 
 
 class Constants:
@@ -30,6 +31,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.button(QtWidgets.QWizard.NextButton).clicked.connect(self.validate_inputs)
         self.ui.button_refresh.clicked.connect(self.get_connected_devices)
         self.ui.comboBox_device.currentIndexChanged.connect(self.on_combobox_device_changed)
+        self.ui.lineEdit_authors.setText(os.environ['USER'])
         self.get_connected_devices()
 
     # User interface for page two
