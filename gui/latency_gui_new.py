@@ -39,9 +39,12 @@ class LatencyGUI(QtWidgets.QWizard):
     # User interface for page two
     def init_ui_page_two(self):
         self.ui.button_start_listening.clicked.connect(self.on_start_listening_button_pressed)
-        self.ui.setButtonText(QtWidgets.QWizard.FinishButton, 'Start Measurement')
+        #self.ui.setButtonText(QtWidgets.QWizard.FinishButton, 'Start Measurement')
         self.ui.label_selected_device.setText(self.ui.lineEdit_device_name.text())
         self.ui.label_selected_device_type.setText(str(self.ui.comboBox_device_type.currentText()))
+
+    def init_ui_page_three(self):
+        pass
 
     # Fills the combobox with all possible device types defined in the constants
     def init_combobox_device_type(self):
@@ -78,16 +81,19 @@ class LatencyGUI(QtWidgets.QWizard):
     def get_connected_devices(self):
         lines = []
 
-        command = 'cat /proc/bus/input/devices'
+        command = 'cat /proc/bus/input/devices'  # Get data about all connected devices
         process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
         empty_lines = 0
         for line in iter(process.stdout.readline, ''):
-            if len(line) is 0:
+            if len(line) is 0:  # Count all empty lines
                 empty_lines += 1
                 if empty_lines > 3:
+                    # In the list of available devices, between two different devices there are always three blank
+                    # lines. After all devices are listed, only blank lines are printed out. Therefore, if more than
+                    # three blank lines are found, we can stop because we know we reached the end.
                     break
             else:
-                empty_lines = 0
+                empty_lines = 0  # Reset the empty line counter
                 lines.append(line.decode("utf-8").replace('\n', ''))
 
         devices = []
@@ -100,7 +106,6 @@ class LatencyGUI(QtWidgets.QWizard):
                 devices.append(current_device.copy())
                 current_device.clear()
 
-        # print(devices)
         self.extract_relevant_devices(devices)
 
     def extract_relevant_devices(self, devices):
@@ -111,7 +116,6 @@ class LatencyGUI(QtWidgets.QWizard):
                 product_id = device[0].split(' ')[3].replace('Product=', '')
                 name = device[1].replace('"', '').replace('N: Name=', '')
                 device_id = self.get_device_id(device[5])
-                # print('Device ID: ', device_id)
                 device_names.append(name)
                 self.device_objects.append(Device(vendor_id, product_id, name, device_id))
 

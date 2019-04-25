@@ -577,7 +577,7 @@ The pressed button will be used for the measurement.</string>
      </font>
     </property>
     <property name="text">
-     <string>Measurement of [DEVICE NAME] finished successfully. 
+     <string>Measurement finished successfully. 
 The results are saved under 
 [PATH NAME]</string>
     </property>
@@ -632,7 +632,7 @@ All crowdsourced data can be found on</string>
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>410</y>
+      <y>400</y>
       <width>251</width>
       <height>31</height>
      </rect>
