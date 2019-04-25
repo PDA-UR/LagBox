@@ -4,32 +4,41 @@
 from PyQt5 import QtWidgets, uic
 import sys
 from subprocess import Popen, PIPE, STDOUT
-#import re
 import struct
 import evdev
+
 
 class Constants:
     DEVICE_TYPES = ["Gamepad", "Mouse", "Keyboard"]
     WINDOW_TITLE = 'LagBox'
 
 
-class LatencyGUI(QtWidgets.QMainWindow):
+class LatencyGUI(QtWidgets.QWizard):
 
     device_objects = []
 
     def __init__(self):
         super().__init__()
-        self.init_ui()
+        self.init_ui_page_one()
 
-    def init_ui(self):
+    # User interface for page one
+    def init_ui_page_one(self):
         self.ui = uic.loadUi("latency_gui.ui", self)
         self.setWindowTitle(Constants.WINDOW_TITLE)
         self.show()
         self.init_combobox_device_type()
-        self.ui.button_next.clicked.connect(self.on_measurement_started_button_pressed)
+        self.button(QtWidgets.QWizard.NextButton).clicked.connect(self.validate_inputs)
         self.ui.button_refresh.clicked.connect(self.get_connected_devices)
         self.get_connected_devices()
 
+    # User interface for page two
+    def init_ui_page_two(self):
+        self.ui.button_start_listening.clicked.connect(self.on_start_listening_button_pressed)
+        self.ui.setButtonText(QtWidgets.QWizard.FinishButton, 'Start Measurement')
+        self.ui.label_selected_device.setText(self.ui.lineEdit_device_name.text())
+        self.ui.label_selected_device_type.setText(str(self.ui.comboBox_device_type.currentText()))
+
+    # Fills the combobox with all possible device types defined in the constants
     def init_combobox_device_type(self):
         self.ui.comboBox_device_type.addItems(Constants.DEVICE_TYPES)
         self.ui.comboBox_device_type.setCurrentIndex(0)
@@ -39,11 +48,10 @@ class LatencyGUI(QtWidgets.QMainWindow):
         self.ui.comboBox_device.addItems(devices)
         self.ui.comboBox_device_type.setCurrentIndex(0)
 
-        self.get_pressed_button('13')
-
-    def on_measurement_started_button_pressed(self):
+    def on_start_listening_button_pressed(self):
         print("Starting measurement")
-        self.validate_inputs()
+        #self.ui.button_start_listening.setText('Listening...')
+        self.get_pressed_button('7')
 
     def validate_inputs(self):
         authors = self.ui.lineEdit_authors.text()
@@ -54,7 +62,7 @@ class LatencyGUI(QtWidgets.QMainWindow):
         print("Device name: ", device_name)
         print("Device type: ", device_type)
 
-        self.start_measurement()
+        self.init_ui_page_two()
 
     def get_connected_devices(self):
         lines = []
@@ -104,7 +112,6 @@ class LatencyGUI(QtWidgets.QMainWindow):
                 return part
 
     def get_pressed_button(self, event_id):
-
         try:
             device = evdev.InputDevice('/dev/input/event' + event_id)
 
@@ -114,6 +121,7 @@ class LatencyGUI(QtWidgets.QMainWindow):
                     if key_event.keystate:
                         button_code = key_event.scancode
                         print('ID of pressed button:_', button_code)
+                        self.ui.label_pressed_button_id.setText(str(button_code))
                         break
 
         except PermissionError as error:
@@ -134,7 +142,7 @@ class LatencyGUI(QtWidgets.QMainWindow):
 
     # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
     def start_measurement(self):
-        self.get_pressed_button('13')
+        pass
         # command = 'ping google.com -c 5'
         # process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
         #
