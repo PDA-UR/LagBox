@@ -29,6 +29,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.init_combobox_device_type()
         self.button(QtWidgets.QWizard.NextButton).clicked.connect(self.validate_inputs)
         self.ui.button_refresh.clicked.connect(self.get_connected_devices)
+        self.ui.comboBox_device.currentIndexChanged.connect(self.on_combobox_device_changed)
         self.get_connected_devices()
 
     # User interface for page two
@@ -47,6 +48,9 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.comboBox_device.clear()
         self.ui.comboBox_device.addItems(devices)
         self.ui.comboBox_device_type.setCurrentIndex(0)
+
+    def on_combobox_device_changed(self):
+        self.ui.lineEdit_device_name.setText(str(self.ui.comboBox_device.currentText()))
 
     def on_start_listening_button_pressed(self):
         print("Starting measurement")
