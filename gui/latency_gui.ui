@@ -604,8 +604,7 @@ The results are saved under
 By pressing the button &quot;Upload results&quot;, your current measurement
  will be automatically sent to us. 
 
-All crowdsourced data can be found on 
-https://hci.ur.de/</string>
+All crowdsourced data can be found on</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -615,7 +614,7 @@ https://hci.ur.de/</string>
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>430</y>
+      <y>450</y>
       <width>250</width>
       <height>51</height>
      </rect>
@@ -627,6 +626,31 @@ https://hci.ur.de/</string>
     </property>
     <property name="text">
      <string>Upload results</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>410</y>
+      <width>251</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+      <underline>true</underline>
+     </font>
+    </property>
+    <property name="text">
+     <string>&lt;a href=&quot;https://hci.ur.de/&quot;&gt;https://hci.ur.de/&lt;/a&gt;</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+    <property name="openExternalLinks">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>
