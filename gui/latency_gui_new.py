@@ -17,6 +17,7 @@ class Constants:
 class LatencyGUI(QtWidgets.QWizard):
 
     device_objects = []
+    device_id = -1
 
     def __init__(self):
         super().__init__()
@@ -53,11 +54,18 @@ class LatencyGUI(QtWidgets.QWizard):
 
     def on_combobox_device_changed(self):
         self.ui.lineEdit_device_name.setText(str(self.ui.comboBox_device.currentText()))
+        for device in self.device_objects:
+            print(device.name)
+            print(self.ui.comboBox_device.currentText())
+            if device.name == self.ui.comboBox_device.currentText():
+                print('in loop')
+                self.device_id = device.device_id
+                break
 
     def on_start_listening_button_pressed(self):
         print("Starting measurement")
         #self.ui.button_start_listening.setText('Listening...')
-        self.get_pressed_button('7')
+        self.get_pressed_button()
 
     def validate_inputs(self):
         authors = self.ui.lineEdit_authors.text()
@@ -117,9 +125,9 @@ class LatencyGUI(QtWidgets.QWizard):
             if 'event' in part:
                 return part
 
-    def get_pressed_button(self, event_id):
+    def get_pressed_button(self):
         try:
-            device = evdev.InputDevice('/dev/input/event' + event_id)
+            device = evdev.InputDevice('/dev/input/' + str(self.device_id))
 
             for event in device.read_loop():
                 if event.type == evdev.ecodes.EV_KEY:
@@ -131,24 +139,11 @@ class LatencyGUI(QtWidgets.QWizard):
                         break
 
         except PermissionError as error:
-            print(error)
+            print(error)  # TODO: Check if this error can happen on a Raspberry Pi
 
-        # command = 'evtest /dev/input/event13 | grep EV_KEY'
-        # process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
-        #
-        # lines = []
-        #
-        # for line in iter(process.stdout.readline, ''):
-        #     print(line)
-        #     lines.append(line)
-        #     if len(lines) > 3:
-        #         break
-        # print(lines)
-
-
-    # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
     def start_measurement(self):
         pass
+        # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
         # command = 'ping google.com -c 5'
         # process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
         #
