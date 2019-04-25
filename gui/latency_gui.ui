@@ -1,24 +1,169 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>Wizard</class>
+ <widget class="QWizard" name="Wizard">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>629</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Wizard</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="label_title">
+  <widget class="QWizardPage" name="wizardPage1">
+   <widget class="QPushButton" name="button_refresh">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>230</y>
+      <width>91</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Refresh</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_device_type">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>20</y>
+      <y>140</y>
+      <width>211</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Device type*:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>186</y>
+      <width>741</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Select the kind of device yout want to use for measurements.</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_new_measurement">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>80</y>
+      <width>281</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>22</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>New measurement:</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_device_type">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>140</y>
+      <width>251</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>360</y>
+      <width>741</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>(Optional) The device name provided by the hardware does not always represent the the actual name. 
+Therefore it can be changed here</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>276</y>
+      <width>741</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Select the device yout want to use for measurements.</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_device_name">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>314</y>
+      <width>491</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="placeholderText">
+     <string>e.g. &quot;Logitech RX250&quot;</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_device">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>230</y>
+      <width>391</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_title">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
       <width>781</width>
       <height>61</height>
      </rect>
@@ -38,29 +183,11 @@
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label_new_measurement">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>104</y>
-      <width>281</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>22</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>New measurement:</string>
-    </property>
-   </widget>
    <widget class="QLineEdit" name="lineEdit_authors">
     <property name="geometry">
      <rect>
-      <x>270</x>
-      <y>424</y>
+      <x>260</x>
+      <y>404</y>
       <width>491</width>
       <height>41</height>
      </rect>
@@ -77,11 +204,29 @@
      <string>e.g. &quot;John Doe, Jane Doe&quot;</string>
     </property>
    </widget>
+   <widget class="QLabel" name="label_device">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>230</y>
+      <width>211</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Device*:</string>
+    </property>
+   </widget>
    <widget class="QLabel" name="label_authors">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>424</y>
+      <x>10</x>
+      <y>404</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -98,8 +243,8 @@
    <widget class="QLabel" name="label_device_name">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>334</y>
+      <x>10</x>
+      <y>314</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -113,156 +258,11 @@
      <string>Name of the device:</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_device_name">
-    <property name="geometry">
-     <rect>
-      <x>270</x>
-      <y>334</y>
-      <width>491</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-    </property>
-    <property name="placeholderText">
-     <string>e.g. &quot;Logitech RX250&quot;</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_device_type">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>160</y>
-      <width>211</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Device type*:</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="comboBox_device_type">
-    <property name="geometry">
-     <rect>
-      <x>270</x>
-      <y>160</y>
-      <width>251</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="button_next">
-    <property name="geometry">
-     <rect>
-      <x>190</x>
-      <y>530</y>
-      <width>421</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Next</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="comboBox_device">
-    <property name="geometry">
-     <rect>
-      <x>270</x>
-      <y>250</y>
-      <width>391</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_device">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>250</y>
-      <width>211</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Device*:</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>206</y>
-      <width>741</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Select the kind of device yout want to use for measurements.</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>296</y>
-      <width>741</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Select the device yout want to use for measurements.</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_3">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>380</y>
-      <width>741</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>(Optional) The device name provided by the hardware does not always represent the the actual name. 
-Therefore it can be changed here</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>470</y>
+      <x>30</x>
+      <y>450</y>
       <width>741</width>
       <height>51</height>
      </rect>
@@ -273,13 +273,57 @@ If you want your name(s) to appear on the results page,
 please insert them here.</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="button_refresh">
+  </widget>
+  <widget class="QWizardPage" name="wizardPage2">
+   <widget class="QLabel" name="label_new_measurement_2">
     <property name="geometry">
      <rect>
-      <x>670</x>
-      <y>250</y>
-      <width>91</width>
-      <height>41</height>
+      <x>10</x>
+      <y>80</y>
+      <width>281</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>22</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>New measurement:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_title_2">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>781</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>32</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>LagBox</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_press_button_description">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>170</y>
+      <width>701</width>
+      <height>111</height>
      </rect>
     </property>
     <property name="font">
@@ -288,21 +332,147 @@ please insert them here.</string>
      </font>
     </property>
     <property name="text">
-     <string>Refresh</string>
+     <string>Press the button below. 
+Afterwards, LagBox will listen for a key input. 
+The pressed button will be used for the measurement.</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_start_listening">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>300</y>
+      <width>441</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Start listening for button input events</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_selected_device_description">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>410</y>
+      <width>331</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Your device:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_selected_device_type_description">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>430</y>
+      <width>331</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Device type:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_pressed_button_id_description">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>450</y>
+      <width>331</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>ID of pressed button:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_selected_device">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>410</y>
+      <width>451</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_selected_device_type">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>430</y>
+      <width>451</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_pressed_button_id">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>450</y>
+      <width>451</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>800</width>
-     <height>27</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>
