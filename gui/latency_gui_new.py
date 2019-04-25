@@ -10,7 +10,8 @@ import os
 
 
 class Constants:
-    DEVICE_TYPES = ["Gamepad", "Mouse", "Keyboard"]
+    UI_FILE = 'latency_gui.ui'
+    DEVICE_TYPES = ['Gamepad', 'Mouse', 'Keyboard']
     WINDOW_TITLE = 'LagBox'
 
 
@@ -25,7 +26,7 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # User interface for page one
     def init_ui_page_one(self):
-        self.ui = uic.loadUi("latency_gui.ui", self)
+        self.ui = uic.loadUi(Constants.UI_FILE, self)
         self.setWindowTitle(Constants.WINDOW_TITLE)
         self.show()
         self.init_combobox_device_type()
@@ -55,16 +56,12 @@ class LatencyGUI(QtWidgets.QWizard):
     def on_combobox_device_changed(self):
         self.ui.lineEdit_device_name.setText(str(self.ui.comboBox_device.currentText()))
         for device in self.device_objects:
-            print(device.name)
-            print(self.ui.comboBox_device.currentText())
             if device.name == self.ui.comboBox_device.currentText():
-                print('in loop')
                 self.device_id = device.device_id
                 break
 
     def on_start_listening_button_pressed(self):
         print("Starting measurement")
-        #self.ui.button_start_listening.setText('Listening...')
         self.get_pressed_button()
 
     def validate_inputs(self):
@@ -125,6 +122,9 @@ class LatencyGUI(QtWidgets.QWizard):
             if 'event' in part:
                 return part
 
+    # Listens for all keyevents of the selected device. As soon as the first key-down event is recognized,
+    # the measurements is stopped
+    # TODO: Find a non UI blocking way
     def get_pressed_button(self):
         try:
             device = evdev.InputDevice('/dev/input/' + str(self.device_id))
@@ -132,7 +132,7 @@ class LatencyGUI(QtWidgets.QWizard):
             for event in device.read_loop():
                 if event.type == evdev.ecodes.EV_KEY:
                     key_event = evdev.categorize(event)
-                    if key_event.keystate:
+                    if key_event.keystate:  # Check if button is pressed down
                         button_code = key_event.scancode
                         print('ID of pressed button:_', button_code)
                         self.ui.label_pressed_button_id.setText(str(button_code))
