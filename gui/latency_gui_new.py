@@ -10,11 +10,64 @@ import evdev
 import os
 import time
 
+# from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton
+#from PyQt5.QtGui import QIcon
+
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+
+from matplotlib import pyplot as plt
+import seaborn as sns
+
+import random
+
+
 
 class Constants:
     UI_FILE = 'latency_gui.ui'
     DEVICE_TYPES = ['Gamepad', 'Mouse', 'Keyboard']
     WINDOW_TITLE = 'LagBox'
+
+    PLOT_X_MIN = 0  # Minimum x value of the plot
+    PLOT_X_MAX = 100  # Maximum x value of the plot
+    PLOT_WIDTH = 16
+    PLOT_HEIGHT = 4
+    PLOT_FONTSIZE = 18
+
+
+# Parts of code of following class based on https://pythonspot.com/pyqt5-matplotlib/
+class PlotCanvas(FigureCanvas):
+
+    def __init__(self, parent=None):
+        print('Init plot')
+        fig = Figure(figsize=(7, 3), dpi=100)
+        #self.axes = fig.add_subplot(111)
+
+        FigureCanvas.__init__(self, fig)
+        self.setParent(parent)
+
+        FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+        self.plot()
+
+    def plot(self):
+        latencies = [random.random() for i in range(25)]
+        # ax = self.figure.add_subplot(111)
+        # ax.plot(data, 'r-')
+        # ax.set_title('PyQt Matplotlib Example')
+        # self.draw()
+
+        plt.rcParams.update({'font.size': Constants.PLOT_FONTSIZE})
+        plt.figure(figsize=[Constants.PLOT_WIDTH, Constants.PLOT_HEIGHT])
+        ax = sns.swarmplot(x=latencies, hue=None, palette="colorblind", dodge=True, marker="H", orient="h", alpha=1,
+                           zorder=0)
+        self.draw()
+
+        # plt.title("TEST")
+        plt.xlabel("latency (ms)")
+        plt.xlim(Constants.PLOT_X_MIN, Constants.PLOT_X_MAX)
+
+        axes = plt.gca()
 
 
 class LatencyGUI(QtWidgets.QWizard):
@@ -32,6 +85,10 @@ class LatencyGUI(QtWidgets.QWizard):
     def init_ui(self):
         self.ui = uic.loadUi(Constants.UI_FILE, self)
         self.setWindowTitle(Constants.WINDOW_TITLE)
+
+        #dataplot = PlotCanvas(self)
+        #dataplot.move(50, 100)
+
         self.show()
 
     # User interface for page one
@@ -47,17 +104,27 @@ class LatencyGUI(QtWidgets.QWizard):
     # User interface for page two
     def init_ui_page_two(self):
         self.ui.button_restart_measurement.clicked.connect(self.listen_for_key_inputs)
-        self.ui.button_restart_measurement.setEnabled(False)
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Start Measurement')
         self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)  # Disable the button until the keycode has been found out
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.on_page_two_next_button_pressed)
         self.ui.button(QtWidgets.QWizard.BackButton).clicked.connect(self.on_page_two_back_button_pressed)
         self.ui.label_selected_device.setText(self.ui.lineEdit_device_name.text())
         self.ui.label_selected_device_type.setText(str(self.ui.comboBox_device_type.currentText()))
 
         self.listen_for_key_inputs()
 
+    # User interface for page three
     def init_ui_page_three(self):
+        print('Init UI page three')
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
+        self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
+
+    # User interface for page four
+    def init_ui_page_four(self):
         pass
+
+    def on_page_two_next_button_pressed(self):
+        self.init_ui_page_three()
 
     def on_page_two_back_button_pressed(self):
         if self.timer is not None and self.timer.isActive():
@@ -98,12 +165,10 @@ class LatencyGUI(QtWidgets.QWizard):
             self.ui.button_restart_measurement.setText('Measuring...')
             self.ui.button_restart_measurement.setEnabled(False)
             print("Starting measurement")
-        else:
-            print('Button disabled')
 
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.scan_key_inputs)
-        self.timer.start(50)
+            self.timer = QTimer(self)
+            self.timer.timeout.connect(self.scan_key_inputs)
+            self.timer.start(50)
 
     def validate_inputs(self):
         #authors = self.ui.lineEdit_authors.text()
@@ -144,6 +209,7 @@ class LatencyGUI(QtWidgets.QWizard):
 
         self.extract_relevant_devices(devices)
 
+    # Exract all USB devices connected to the computer and save the details of each device as an object
     def extract_relevant_devices(self, devices):
         device_names = []
         for device in devices:
@@ -159,11 +225,13 @@ class LatencyGUI(QtWidgets.QWizard):
 
         self.init_combobox_device(device_names)
 
+    # Extract the ID of the device (eventXX) from the device details by searching for the corresponding keyword
     def get_device_id(self, line):
         for part in line.split(' '):
             if 'event' in part:
                 return part
 
+    # Auto-detect the type of the device by searching for the corresponding keywords in the device details
     def get_device_type(self, line):
         if 'kbd' in line:
             return 'Keyboard (auto-detected)'
@@ -192,8 +260,8 @@ class LatencyGUI(QtWidgets.QWizard):
                             self.ui.button_restart_measurement.setEnabled(True)
                             self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
 
-                # End loop after 50ms. The QTimer will restart it every 100ms.
-                # Therefore 50ms remain for the user to interact with the UI in other ways.
+                # End loop after 25ms. The QTimer will restart it every 50ms.
+                # Therefore an additional 25ms remain for the user to interact with the UI in other ways.
                 if time.time() - time_start > 0.025:
                     return
 
