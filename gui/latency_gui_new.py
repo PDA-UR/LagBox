@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtWidgets, uic
+from PyQt5.QtCore import QTimer
 import sys
 from subprocess import Popen, PIPE, STDOUT
 import struct
 import evdev
 import os
+import time
 
 
 class Constants:
@@ -56,8 +58,6 @@ class LatencyGUI(QtWidgets.QWizard):
             self.ui.comboBox_device_type.addItems(new_list)
         else:
             self.ui.comboBox_device_type.addItems(Constants.DEVICE_TYPES)
-
-        #self.ui.comboBox_device_type.setCurrentIndex(0)
 
     def init_combobox_device(self, devices):
         self.ui.comboBox_device.clear()
@@ -154,17 +154,31 @@ class LatencyGUI(QtWidgets.QWizard):
     # the measurements is stopped
     # TODO: Find a non UI blocking way
     def get_pressed_button(self):
+        timer = QTimer(self)
+        timer.timeout.connect(lambda: self.scan_key_inputs(timer))
+        timer.start(100)
+
+    def scan_key_inputs(self, timer):
         try:
             device = evdev.InputDevice('/dev/input/' + str(self.device_id))
+            time_start = time.time()  # Remember start time
 
-            for event in device.read_loop():
-                if event.type == evdev.ecodes.EV_KEY:
-                    key_event = evdev.categorize(event)
-                    if key_event.keystate:  # Check if button is pressed down
-                        button_code = key_event.scancode
-                        print('ID of pressed button:_', button_code)
-                        self.ui.label_pressed_button_id.setText(str(button_code))
-                        break
+            while True:
+                event = device.read_one()  # Get current event
+                if event is not None:
+                    if event.type == evdev.ecodes.EV_KEY:  # Check if the current event is a button press
+                        key_event = evdev.categorize(event)
+                        if key_event.keystate:  # Check if button is pressed down
+                            print('Found event:')
+                            print(event)
+                            print(key_event)
+                            print('Stopping timer')
+                            timer.stop()
+
+                # End loop after 50ms. The QTimer will restart it every 100ms.
+                # Therefore 50ms remain for the user to interact with the UI in other ways.
+                if time.time() - time_start > 0.05:
+                    return
 
         except PermissionError as error:
             print(error)  # TODO: Check if this error can happen on a Raspberry Pi
