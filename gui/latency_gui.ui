@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>660</x>
-      <y>230</y>
+      <y>170</y>
       <width>91</width>
       <height>41</height>
      </rect>
@@ -36,7 +36,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>140</y>
+      <y>250</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -54,7 +54,7 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>186</y>
+      <y>296</y>
       <width>741</width>
       <height>21</height>
      </rect>
@@ -67,7 +67,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>80</y>
+      <y>100</y>
       <width>281</width>
       <height>31</height>
      </rect>
@@ -85,7 +85,7 @@
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>140</y>
+      <y>250</y>
       <width>251</width>
       <height>41</height>
      </rect>
@@ -100,7 +100,7 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>360</y>
+      <y>416</y>
       <width>741</width>
       <height>31</height>
      </rect>
@@ -114,7 +114,7 @@ Therefore it can be changed here</string>
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>276</y>
+      <y>216</y>
       <width>741</width>
       <height>21</height>
      </rect>
@@ -127,7 +127,7 @@ Therefore it can be changed here</string>
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>314</y>
+      <y>370</y>
       <width>491</width>
       <height>41</height>
      </rect>
@@ -148,7 +148,7 @@ Therefore it can be changed here</string>
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>230</y>
+      <y>170</y>
       <width>391</width>
       <height>41</height>
      </rect>
@@ -183,32 +183,11 @@ Therefore it can be changed here</string>
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_authors">
-    <property name="geometry">
-     <rect>
-      <x>260</x>
-      <y>404</y>
-      <width>491</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-    </property>
-    <property name="placeholderText">
-     <string>e.g. &quot;John Doe, Jane Doe&quot;</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_device">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>230</y>
+      <y>170</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -222,29 +201,11 @@ Therefore it can be changed here</string>
      <string>Device*:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_authors">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>404</y>
-      <width>211</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Your name(s):</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_device_name">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>314</y>
+      <y>370</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -256,20 +217,6 @@ Therefore it can be changed here</string>
     </property>
     <property name="text">
      <string>Name of the device:</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_4">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>450</y>
-      <width>741</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>(Optional) After taking the measurement you will be asked if you want to upload the results. 
-If you want your name(s) to appear on the results page, please insert them here.</string>
     </property>
    </widget>
   </widget>
@@ -651,6 +598,61 @@ All crowdsourced data can be found on</string>
     </property>
     <property name="openExternalLinks">
      <bool>true</bool>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QWizardPage" name="wizardPage_3">
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>46</y>
+      <width>741</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>(Optional) After taking the measurement you will be asked if you want to upload the results. 
+If you want your name(s) to appear on the results page, please insert them here.</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_authors">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>0</y>
+      <width>491</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="placeholderText">
+     <string>e.g. &quot;John Doe, Jane Doe&quot;</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_authors">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>211</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Your name(s):</string>
     </property>
    </widget>
   </widget>
