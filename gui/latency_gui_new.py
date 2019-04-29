@@ -17,7 +17,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from matplotlib import pyplot as plt
-import seaborn as sns
+# import seaborn as sns
 
 import random
 
@@ -91,7 +91,7 @@ class LatencyGUI(QtWidgets.QWizard):
 
         self.show()
 
-    # User interface for page one
+    # User interface for page one (Page where general settings are placed)
     def init_ui_page_one(self):
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
         self.init_combobox_device_type(None)
@@ -101,30 +101,59 @@ class LatencyGUI(QtWidgets.QWizard):
         #self.ui.lineEdit_authors.setText(os.environ['USER'])
         self.get_connected_devices()
 
-    # User interface for page two
+    # User interface for page two (Page where the detection of the input button takes place)
     def init_ui_page_two(self):
+        print('Init UI page 2')
         self.ui.button_restart_measurement.clicked.connect(self.listen_for_key_inputs)
+
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Start Measurement')
         self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)  # Disable the button until the keycode has been found out
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.on_page_two_next_button_pressed)
+
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_two)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_three)
+
         self.ui.button(QtWidgets.QWizard.BackButton).clicked.connect(self.on_page_two_back_button_pressed)
         self.ui.label_selected_device.setText(self.ui.lineEdit_device_name.text())
         self.ui.label_selected_device_type.setText(str(self.ui.comboBox_device_type.currentText()))
 
         self.listen_for_key_inputs()
 
-    # User interface for page three
+    # User interface for page three (Page where the LagBox measurement takes place)
     def init_ui_page_three(self):
-        print('Init UI page three')
+        print('Init UI page 3')
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
         self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_four)
 
-    # User interface for page four
+    # User interface for page four (Page that displays the results of the lagbox measurement)
     def init_ui_page_four(self):
+        print('Init UI page 4')
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_four)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_five)
+
+    # User interface for page five (Page that askes the user if he wants to upload the measurements)
+    def init_ui_page_five(self):
+        print('Init UI page 5')
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Upload Results')
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_five)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_six)
+
+        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish')
+        # self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.quit_application)
+
+    def init_ui_page_six(self):
+        print('Init UI page 6')
+        pass
+
+    # User interface for page six (Page where data about uploading the data is collected)
+    def init_ui_page_six(self):
+        # TODO: Prefill the author field and maybe even the email field with information saved in a .ini file
         pass
 
     def on_page_two_next_button_pressed(self):
-        self.init_ui_page_three()
+        pass
+        #self.init_ui_page_three()
 
     def on_page_two_back_button_pressed(self):
         if self.timer is not None and self.timer.isActive():
