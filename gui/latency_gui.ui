@@ -300,8 +300,8 @@ Therefore it can be changed here</string>
    <widget class="QLabel" name="label_press_button_description">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>170</y>
+      <x>30</x>
+      <y>250</y>
       <width>701</width>
       <height>111</height>
      </rect>
@@ -312,21 +312,21 @@ Therefore it can be changed here</string>
      </font>
     </property>
     <property name="text">
-     <string>Press the button below. 
-Afterwards, LagBox will listen for a key input. 
-The pressed button will be used for the measurement.</string>
+     <string> LagBox is listening for a key input of the device specified above. 
+The next button you press will be used for the measurement. 
+ Press the button until it's ID will be displayed above.</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QPushButton" name="button_start_listening">
+   <widget class="QPushButton" name="button_restart_measurement">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>300</y>
-      <width>441</width>
-      <height>61</height>
+      <x>240</x>
+      <y>460</y>
+      <width>291</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="font">
@@ -335,14 +335,14 @@ The pressed button will be used for the measurement.</string>
      </font>
     </property>
     <property name="text">
-     <string>Start listening for button input events</string>
+     <string>Restart Button Detection</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_selected_device_description">
     <property name="geometry">
      <rect>
       <x>60</x>
-      <y>410</y>
+      <y>130</y>
       <width>331</width>
       <height>21</height>
      </rect>
@@ -355,14 +355,14 @@ The pressed button will be used for the measurement.</string>
      </font>
     </property>
     <property name="text">
-     <string>Your device:</string>
+     <string>Device:</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_selected_device_type_description">
     <property name="geometry">
      <rect>
       <x>60</x>
-      <y>430</y>
+      <y>150</y>
       <width>331</width>
       <height>21</height>
      </rect>
@@ -382,7 +382,7 @@ The pressed button will be used for the measurement.</string>
     <property name="geometry">
      <rect>
       <x>60</x>
-      <y>450</y>
+      <y>190</y>
       <width>331</width>
       <height>21</height>
      </rect>
@@ -402,7 +402,7 @@ The pressed button will be used for the measurement.</string>
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>410</y>
+      <y>130</y>
       <width>451</width>
       <height>21</height>
      </rect>
@@ -420,7 +420,7 @@ The pressed button will be used for the measurement.</string>
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>430</y>
+      <y>150</y>
       <width>451</width>
       <height>21</height>
      </rect>
@@ -438,7 +438,7 @@ The pressed button will be used for the measurement.</string>
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>450</y>
+      <y>190</y>
       <width>451</width>
       <height>21</height>
      </rect>
