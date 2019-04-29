@@ -584,31 +584,34 @@ The results are saved under
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-  </widget>
-  <widget class="QWizardPage" name="wizardPage_3">
-   <widget class="QPushButton" name="button_upload_results">
+   <widget class="QLabel" name="label_measurement_finished_2">
     <property name="geometry">
      <rect>
-      <x>260</x>
-      <y>370</y>
-      <width>250</width>
-      <height>51</height>
+      <x>20</x>
+      <y>330</y>
+      <width>731</width>
+      <height>101</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>16</pointsize>
+      <pointsize>50</pointsize>
      </font>
     </property>
     <property name="text">
-     <string>Upload results</string>
+     <string>[PLACE PLOT HERE]</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
+  </widget>
+  <widget class="QWizardPage" name="wizardPage_3">
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>320</y>
+      <y>300</y>
       <width>251</width>
       <height>31</height>
      </rect>
@@ -633,7 +636,7 @@ The results are saved under
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>170</y>
+      <y>140</y>
       <width>731</width>
       <height>161</height>
      </rect>
@@ -649,6 +652,52 @@ By pressing the button &quot;Upload results&quot;, your current measurement
  will be automatically sent to us. 
 
 All crowdsourced data can be found on</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_title_5">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>30</y>
+      <width>781</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>32</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>LagBox</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_crowdsourcin_explanation_3">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>370</y>
+      <width>731</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>If you do not want to share your measurements,
+just press &quot;Finish&quot; to exit the application</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -818,6 +867,80 @@ If you want your name(s) to appear on the results page, please check the checkbo
       <width>721</width>
       <height>131</height>
      </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QWizardPage" name="wizardPage_5">
+   <widget class="QLabel" name="label_crowdsourcin_explanation_2">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>210</y>
+      <width>731</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Your current measurement has been uploaded. 
+
+All crowdsourced data can be found on</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>310</y>
+      <width>251</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+      <underline>true</underline>
+     </font>
+    </property>
+    <property name="text">
+     <string>&lt;a href=&quot;https://hci.ur.de/&quot;&gt;https://hci.ur.de/&lt;/a&gt;</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+    <property name="openExternalLinks">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_title_6">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>30</y>
+      <width>781</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>32</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Thank you for your participation!</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
   </widget>
