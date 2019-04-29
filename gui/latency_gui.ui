@@ -86,7 +86,7 @@
      <rect>
       <x>260</x>
       <y>250</y>
-      <width>251</width>
+      <width>391</width>
       <height>41</height>
      </rect>
     </property>
@@ -100,7 +100,7 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>416</y>
+      <y>376</y>
       <width>741</width>
       <height>31</height>
      </rect>
@@ -127,7 +127,7 @@ Therefore it can be changed here</string>
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>370</y>
+      <y>330</y>
       <width>491</width>
       <height>41</height>
      </rect>
@@ -205,7 +205,7 @@ Therefore it can be changed here</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>370</y>
+      <y>330</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -217,6 +217,58 @@ Therefore it can be changed here</string>
     </property>
     <property name="text">
      <string>Name of the device:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_ean_upc">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>420</y>
+      <width>491</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="placeholderText">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_ean_upc_description">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>466</y>
+      <width>741</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>(Optional) Enter the European Article Numer/ Universal Product Code to make it easier for others to find your device.</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_ean_upc">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>420</y>
+      <width>211</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>EAN/UPC</string>
     </property>
    </widget>
   </widget>
@@ -547,7 +599,7 @@ The results are saved under
      </font>
     </property>
     <property name="text">
-     <string>Please help us support our research and share your measurements with us. 
+     <string>Please support our research and share your measurements with us. 
 By pressing the button &quot;Upload results&quot;, your current measurement
  will be automatically sent to us. 
 
