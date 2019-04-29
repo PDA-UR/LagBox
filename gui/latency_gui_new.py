@@ -22,6 +22,8 @@ class LatencyGUI(QtWidgets.QWizard):
     device_objects = []
     device_id = -1
 
+    timer = None
+
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -39,14 +41,13 @@ class LatencyGUI(QtWidgets.QWizard):
         self.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
         self.ui.button_refresh.clicked.connect(self.get_connected_devices)
         self.ui.comboBox_device.currentIndexChanged.connect(self.on_combobox_device_changed)
-        self.ui.lineEdit_authors.setText(os.environ['USER'])
+        #self.ui.lineEdit_authors.setText(os.environ['USER'])
         self.get_connected_devices()
 
     # User interface for page two
     def init_ui_page_two(self):
         self.ui.button_restart_measurement.clicked.connect(self.listen_for_key_inputs)
         self.ui.button_restart_measurement.setEnabled(False)
-        #self.ui.setButtonText(QtWidgets.QWizard.FinishButton, 'Start Measurement')
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Start Measurement')
         self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)  # Disable the button until the keycode has been found out
         self.ui.button(QtWidgets.QWizard.BackButton).clicked.connect(self.on_page_two_back_button_pressed)
@@ -59,7 +60,10 @@ class LatencyGUI(QtWidgets.QWizard):
         pass
 
     def on_page_two_back_button_pressed(self):
-        print('Back on page 2')
+        if self.timer is not None and self.timer.isActive():
+            self.timer.stop()
+            print('Stopped timer because back button was pressed')
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
 
     # Fills the combobox with all possible device types defined in the constants
     def init_combobox_device_type(self, auto_detected_value):
@@ -97,9 +101,9 @@ class LatencyGUI(QtWidgets.QWizard):
         else:
             print('Button disabled')
 
-        timer = QTimer(self)
-        timer.timeout.connect(lambda: self.scan_key_inputs(timer))
-        timer.start(100)
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.scan_key_inputs)
+        self.timer.start(50)
 
     def validate_inputs(self):
         #authors = self.ui.lineEdit_authors.text()
@@ -149,7 +153,7 @@ class LatencyGUI(QtWidgets.QWizard):
                 name = device[1].replace('"', '').replace('N: Name=', '')
                 device_id = self.get_device_id(device[5])
                 device_type = self.get_device_type(device[5])
-                print('Device type:', device_type)
+                # print('Device type:', device_type)
                 device_names.append(name)
                 self.device_objects.append(Device(vendor_id, product_id, name, device_id, device_type))
 
@@ -169,7 +173,7 @@ class LatencyGUI(QtWidgets.QWizard):
             return 'Gamepad (auto-detected)'
         return None
 
-    def scan_key_inputs(self, timer):
+    def scan_key_inputs(self):
         try:
             device = evdev.InputDevice('/dev/input/' + str(self.device_id))
             time_start = time.time()  # Remember start time
@@ -183,14 +187,14 @@ class LatencyGUI(QtWidgets.QWizard):
                             button_code = key_event.scancode
                             print('ID of pressed button: ', button_code)
                             self.ui.label_pressed_button_id.setText(str(button_code))
-                            timer.stop()  # Stop the timer so that this function is not called again
+                            self.timer.stop()  # Stop the timer so that this function is not called again
                             self.ui.button_restart_measurement.setText('Restart Button Detection')
                             self.ui.button_restart_measurement.setEnabled(True)
                             self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
 
                 # End loop after 50ms. The QTimer will restart it every 100ms.
                 # Therefore 50ms remain for the user to interact with the UI in other ways.
-                if time.time() - time_start > 0.05:
+                if time.time() - time_start > 0.025:
                     return
 
         except PermissionError as error:
