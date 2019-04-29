@@ -29,7 +29,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui = uic.loadUi(Constants.UI_FILE, self)
         self.setWindowTitle(Constants.WINDOW_TITLE)
         self.show()
-        self.init_combobox_device_type()
+        self.init_combobox_device_type(None)
         self.button(QtWidgets.QWizard.NextButton).clicked.connect(self.validate_inputs)
         self.ui.button_refresh.clicked.connect(self.get_connected_devices)
         self.ui.comboBox_device.currentIndexChanged.connect(self.on_combobox_device_changed)
@@ -47,9 +47,17 @@ class LatencyGUI(QtWidgets.QWizard):
         pass
 
     # Fills the combobox with all possible device types defined in the constants
-    def init_combobox_device_type(self):
-        self.ui.comboBox_device_type.addItems(Constants.DEVICE_TYPES)
-        self.ui.comboBox_device_type.setCurrentIndex(0)
+    def init_combobox_device_type(self, auto_detected_value):
+        self.ui.comboBox_device_type.clear()  # Empty the list
+
+        if not (auto_detected_value is None):  # Check if an auto-detected value exists
+            new_list = Constants.DEVICE_TYPES.copy()
+            new_list.insert(0, auto_detected_value)
+            self.ui.comboBox_device_type.addItems(new_list)
+        else:
+            self.ui.comboBox_device_type.addItems(Constants.DEVICE_TYPES)
+
+        #self.ui.comboBox_device_type.setCurrentIndex(0)
 
     def init_combobox_device(self, devices):
         self.ui.comboBox_device.clear()
@@ -57,10 +65,14 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.comboBox_device_type.setCurrentIndex(0)
 
     def on_combobox_device_changed(self):
+        # Copy the name of the device into the text field to allow the user to change the displayed name
         self.ui.lineEdit_device_name.setText(str(self.ui.comboBox_device.currentText()))
+
+        #
         for device in self.device_objects:
             if device.name == self.ui.comboBox_device.currentText():
                 self.device_id = device.device_id
+                self.init_combobox_device_type(device.device_type)
 
                 break
 
@@ -136,7 +148,7 @@ class LatencyGUI(QtWidgets.QWizard):
             return 'Mouse (auto-detected)'
         if 'js' in line:
             return 'Gamepad (auto-detected)'
-        return "Can't detect device type. Enter manually"
+        return None
 
     # Listens for all keyevents of the selected device. As soon as the first key-down event is recognized,
     # the measurements is stopped
