@@ -61,6 +61,7 @@ class LatencyGUI(QtWidgets.QWizard):
         for device in self.device_objects:
             if device.name == self.ui.comboBox_device.currentText():
                 self.device_id = device.device_id
+
                 break
 
     def on_start_listening_button_pressed(self):
@@ -68,11 +69,11 @@ class LatencyGUI(QtWidgets.QWizard):
         self.get_pressed_button()
 
     def validate_inputs(self):
-        authors = self.ui.lineEdit_authors.text()
+        #authors = self.ui.lineEdit_authors.text()
         device_name = self.ui.lineEdit_device_name.text()
         device_type = str(self.ui.comboBox_device_type.currentText())
 
-        print("Authors: ", authors)
+        #print("Authors: ", authors)
         print("Device name: ", device_name)
         print("Device type: ", device_type)
 
@@ -116,8 +117,10 @@ class LatencyGUI(QtWidgets.QWizard):
                 product_id = device[0].split(' ')[3].replace('Product=', '')
                 name = device[1].replace('"', '').replace('N: Name=', '')
                 device_id = self.get_device_id(device[5])
+                device_type = self.get_device_type(device[5])
+                print('Device type:', device_type)
                 device_names.append(name)
-                self.device_objects.append(Device(vendor_id, product_id, name, device_id))
+                self.device_objects.append(Device(vendor_id, product_id, name, device_id, device_type))
 
         self.init_combobox_device(device_names)
 
@@ -125,6 +128,15 @@ class LatencyGUI(QtWidgets.QWizard):
         for part in line.split(' '):
             if 'event' in part:
                 return part
+
+    def get_device_type(self, line):
+        if 'kbd' in line:
+            return 'Keyboard (auto-detected)'
+        if 'mouse' in line:
+            return 'Mouse (auto-detected)'
+        if 'js' in line:
+            return 'Gamepad (auto-detected)'
+        return "Can't detect device type. Enter manually"
 
     # Listens for all keyevents of the selected device. As soon as the first key-down event is recognized,
     # the measurements is stopped
@@ -161,11 +173,12 @@ class LatencyGUI(QtWidgets.QWizard):
 
 class Device:
 
-    def __init__(self, vendor_id, product_id, name, device_id):
+    def __init__(self, vendor_id, product_id, name, device_id, device_type):
         self.vendor_id = vendor_id
         self.product_id = product_id
         self.name = name
         self.device_id = device_id
+        self.device_type = device_type
 
 
 def main():
