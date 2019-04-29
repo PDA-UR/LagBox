@@ -24,15 +24,19 @@ class LatencyGUI(QtWidgets.QWizard):
 
     def __init__(self):
         super().__init__()
+        self.init_ui()
         self.init_ui_page_one()
 
-    # User interface for page one
-    def init_ui_page_one(self):
+    def init_ui(self):
         self.ui = uic.loadUi(Constants.UI_FILE, self)
         self.setWindowTitle(Constants.WINDOW_TITLE)
         self.show()
+
+    # User interface for page one
+    def init_ui_page_one(self):
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
         self.init_combobox_device_type(None)
-        self.button(QtWidgets.QWizard.NextButton).clicked.connect(self.validate_inputs)
+        self.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
         self.ui.button_refresh.clicked.connect(self.get_connected_devices)
         self.ui.comboBox_device.currentIndexChanged.connect(self.on_combobox_device_changed)
         self.ui.lineEdit_authors.setText(os.environ['USER'])
@@ -40,13 +44,22 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # User interface for page two
     def init_ui_page_two(self):
-        self.ui.button_start_listening.clicked.connect(self.on_start_listening_button_pressed)
+        self.ui.button_restart_measurement.clicked.connect(self.listen_for_key_inputs)
+        self.ui.button_restart_measurement.setEnabled(False)
         #self.ui.setButtonText(QtWidgets.QWizard.FinishButton, 'Start Measurement')
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Start Measurement')
+        self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)  # Disable the button until the keycode has been found out
+        self.ui.button(QtWidgets.QWizard.BackButton).clicked.connect(self.on_page_two_back_button_pressed)
         self.ui.label_selected_device.setText(self.ui.lineEdit_device_name.text())
         self.ui.label_selected_device_type.setText(str(self.ui.comboBox_device_type.currentText()))
 
+        self.listen_for_key_inputs()
+
     def init_ui_page_three(self):
         pass
+
+    def on_page_two_back_button_pressed(self):
+        print('Back on page 2')
 
     # Fills the combobox with all possible device types defined in the constants
     def init_combobox_device_type(self, auto_detected_value):
@@ -76,9 +89,17 @@ class LatencyGUI(QtWidgets.QWizard):
 
                 break
 
-    def on_start_listening_button_pressed(self):
-        print("Starting measurement")
-        self.get_pressed_button()
+    def listen_for_key_inputs(self):
+        if self.ui.button_restart_measurement.isEnabled():
+            self.ui.button_restart_measurement.setText('Measuring...')
+            self.ui.button_restart_measurement.setEnabled(False)
+            print("Starting measurement")
+        else:
+            print('Button disabled')
+
+        timer = QTimer(self)
+        timer.timeout.connect(lambda: self.scan_key_inputs(timer))
+        timer.start(100)
 
     def validate_inputs(self):
         #authors = self.ui.lineEdit_authors.text()
@@ -88,8 +109,6 @@ class LatencyGUI(QtWidgets.QWizard):
         #print("Authors: ", authors)
         print("Device name: ", device_name)
         print("Device type: ", device_type)
-
-        self.init_ui_page_two()
 
     def get_connected_devices(self):
         lines = []
@@ -150,14 +169,6 @@ class LatencyGUI(QtWidgets.QWizard):
             return 'Gamepad (auto-detected)'
         return None
 
-    # Listens for all keyevents of the selected device. As soon as the first key-down event is recognized,
-    # the measurements is stopped
-    # TODO: Find a non UI blocking way
-    def get_pressed_button(self):
-        timer = QTimer(self)
-        timer.timeout.connect(lambda: self.scan_key_inputs(timer))
-        timer.start(100)
-
     def scan_key_inputs(self, timer):
         try:
             device = evdev.InputDevice('/dev/input/' + str(self.device_id))
@@ -169,11 +180,13 @@ class LatencyGUI(QtWidgets.QWizard):
                     if event.type == evdev.ecodes.EV_KEY:  # Check if the current event is a button press
                         key_event = evdev.categorize(event)
                         if key_event.keystate:  # Check if button is pressed down
-                            print('Found event:')
-                            print(event)
-                            print(key_event)
-                            print('Stopping timer')
-                            timer.stop()
+                            button_code = key_event.scancode
+                            print('ID of pressed button: ', button_code)
+                            self.ui.label_pressed_button_id.setText(str(button_code))
+                            timer.stop()  # Stop the timer so that this function is not called again
+                            self.ui.button_restart_measurement.setText('Restart Button Detection')
+                            self.ui.button_restart_measurement.setEnabled(True)
+                            self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
 
                 # End loop after 50ms. The QTimer will restart it every 100ms.
                 # Therefore 50ms remain for the user to interact with the UI in other ways.
