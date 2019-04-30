@@ -157,7 +157,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_five)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_six)
 
-        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish')
+        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish without uploading results')
         # self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.quit_application)
 
     # User interface for page six (Page where data about uploading the data is collected)
