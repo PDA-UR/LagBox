@@ -33,6 +33,8 @@ class Constants:
     PLOT_HEIGHT = 4
     PLOT_FONTSIZE = 18
 
+    NUM_TEST_ITERATIONS = 100
+
 
 # Parts of code of following class based on https://pythonspot.com/pyqt5-matplotlib/
 # class PlotCanvas(FigureCanvas):
@@ -86,6 +88,7 @@ class LatencyGUI(QtWidgets.QWizard):
     def init_ui(self):
         self.ui = uic.loadUi(Constants.UI_FILE, self)
         self.setWindowTitle(Constants.WINDOW_TITLE)
+        # self.showFullScreen()
 
         #dataplot = PlotCanvas(self)
         #dataplot.move(50, 100)
@@ -329,20 +332,23 @@ class LatencyGUI(QtWidgets.QWizard):
 
         # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
         #command = 'ping google.com -c 10'
-        command = '../bin/inputLatencyMeasureTool -m 3 -b' + str(self.button_code) + ' -d 2 -event ' + str(self.device_id) + ' -name ' + 'Test Vitus 03'
+        command = '../bin/inputLatencyMeasureTool -m 3 -b ' + str(self.button_code) + ' -d 2 -event ' + str(self.device_id).replace('event', '') + ' -name ' + "'Test Vitus 07'"
+
+        print(command)
+
         process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
 
-        progress = 0
-
         for line in iter(process.stdout.readline, ''):
-            progress += 10
-            self.ui.progressBar.setValue(progress)
-            self.ui.label_progress.setText(str(progress) + '/100')
-            self.ui.label_last_measured_time.setText(str(line))
-
-            #if len(line) is 0:
-            #    break
             print(line)
+            line_id = str(line).split(',')[0].replace("b'", '')
+            if line_id.isdigit():
+                print(line_id)
+                self.ui.progressBar.setValue((int(line_id)/Constants.NUM_TEST_ITERATIONS) * 100)
+                self.ui.label_progress.setText(str(line_id) + '/' + str(Constants.NUM_TEST_ITERATIONS))
+                self.ui.label_last_measured_time.setText(str(line).split(',')[2])
+
+            if len(line) is 0:
+                break
 
         print("Reached end of loop")
 
