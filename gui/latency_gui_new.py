@@ -26,6 +26,7 @@ class Constants:
     #UI_FILE = 'latency_gui.ui'
     UI_FILE = 'latency_gui_800x480.ui'
     DEVICE_TYPES = ['Gamepad', 'Mouse', 'Keyboard']
+    DEVICE_TYPE_IDS = {'Gamepad': 1, 'Mouse': 2, 'Keyboard': 3}
     WINDOW_TITLE = 'LagBox'
 
     PLOT_X_MIN = 0  # Minimum x value of the plot
@@ -76,6 +77,7 @@ class LatencyGUI(QtWidgets.QWizard):
 
     device_objects = []
     device_id = -1
+    device_type = 2
     button_code = -1
     device_name = ''
 
@@ -232,11 +234,11 @@ class LatencyGUI(QtWidgets.QWizard):
     def validate_inputs(self):
         #authors = self.ui.lineEdit_authors.text()
         self.device_name = self.ui.lineEdit_device_name.text()
-        device_type = str(self.ui.comboBox_device_type.currentText())
+        self.device_type = Constants.DEVICE_TYPE_IDS[str(self.ui.comboBox_device_type.currentText()).replace(' (auto-detected)', '')]
 
         #print("Authors: ", authors)
-        print("Device name: ", self.device_name)
-        print("Device type: ", device_type)
+        print("Device name:", self.device_name)
+        print("Device type ID:", self.device_type)
 
     def get_connected_devices(self):
         lines = []
@@ -277,10 +279,10 @@ class LatencyGUI(QtWidgets.QWizard):
                 product_id = device[0].split(' ')[3].replace('Product=', '')
                 name = device[1].replace('"', '').replace('N: Name=', '')
                 device_id = self.get_device_id(device[5])
-                device_type = self.get_device_type(device[5])
+                device_type_auto_detected = self.get_device_type(device[5])
                 # print('Device type:', device_type)
                 device_names.append(name)
-                self.device_objects.append(Device(vendor_id, product_id, name, device_id, device_type))
+                self.device_objects.append(Device(vendor_id, product_id, name, device_id, device_type_auto_detected))
 
         self.init_combobox_device(device_names)
 
