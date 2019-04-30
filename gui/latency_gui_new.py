@@ -214,7 +214,7 @@ class LatencyGUI(QtWidgets.QWizard):
         # Iterate through list of available devices until the one that is currently selected is found
         for device in self.device_objects:
             if device.name == self.ui.comboBox_device.currentText():
-                self.device_id = device.device_id
+                self.device_id = device.device_id.replace('Handlers=', '')
                 self.init_combobox_device_type(device.device_type)
 
                 break  # No need to continue after correct device is found
