@@ -541,7 +541,7 @@ The next button you press will be used for the measurement.
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
+      <y>20</y>
       <width>781</width>
       <height>61</height>
      </rect>
@@ -647,9 +647,9 @@ The results are saved under
      </font>
     </property>
     <property name="text">
-     <string>Please support our research and share your measurements with us. 
+     <string>Please support our research and share your measurements. 
 By pressing the button &quot;Upload results&quot;, your current measurement
- will be automatically sent to us. 
+ will be  sent to us. 
 
 All crowdsourced data can be found on</string>
     </property>
@@ -661,7 +661,7 @@ All crowdsourced data can be found on</string>
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>30</y>
+      <y>20</y>
       <width>781</width>
       <height>61</height>
      </rect>
@@ -709,7 +709,7 @@ just press &quot;Finish&quot; to exit the application</string>
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>24</y>
+      <y>74</y>
       <width>491</width>
       <height>41</height>
      </rect>
@@ -730,7 +730,7 @@ just press &quot;Finish&quot; to exit the application</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>24</y>
+      <y>74</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -748,7 +748,7 @@ just press &quot;Finish&quot; to exit the application</string>
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>70</y>
+      <y>110</y>
       <width>721</width>
       <height>51</height>
      </rect>
@@ -758,11 +758,11 @@ just press &quot;Finish&quot; to exit the application</string>
 If you want your name(s) to appear on the results page, please check the checkbox below.</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_authors_2">
+   <widget class="QLineEdit" name="lineEdit_email">
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>170</y>
+      <y>220</y>
       <width>491</width>
       <height>41</height>
      </rect>
@@ -783,9 +783,9 @@ If you want your name(s) to appear on the results page, please check the checkbo
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>216</y>
+      <y>260</y>
       <width>721</width>
-      <height>51</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
@@ -796,7 +796,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>170</y>
+      <y>220</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -810,11 +810,11 @@ If you want your name(s) to appear on the results page, please check the checkbo
      <string>Your contact email:</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox">
+   <widget class="QCheckBox" name="checkBox_allow_name_publishing">
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>120</y>
+      <y>170</y>
       <width>641</width>
       <height>22</height>
      </rect>
@@ -832,7 +832,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>270</y>
+      <y>310</y>
       <width>211</width>
       <height>41</height>
      </rect>
@@ -850,23 +850,41 @@ If you want your name(s) to appear on the results page, please check the checkbo
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>310</y>
+      <y>350</y>
       <width>721</width>
-      <height>51</height>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
      <string>(Optional) If there is anything you want to share with us, please write it down here.</string>
     </property>
    </widget>
-   <widget class="QPlainTextEdit" name="plainTextEdit">
+   <widget class="QPlainTextEdit" name="plainTextEdit_additional_notes">
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>360</y>
+      <y>380</y>
       <width>721</width>
       <height>131</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_new_measurement_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>331</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>22</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Upload Measurements</string>
     </property>
    </widget>
   </widget>
