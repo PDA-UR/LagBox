@@ -24,7 +24,7 @@ import random
 
 class Constants:
     #UI_FILE = 'latency_gui.ui'
-    UI_FILE = 'latency_gui_720x480.ui'
+    UI_FILE = 'latency_gui_800x480.ui'
     DEVICE_TYPES = ['Gamepad', 'Mouse', 'Keyboard']
     WINDOW_TITLE = 'LagBox'
 
@@ -346,7 +346,7 @@ class LatencyGUI(QtWidgets.QWizard):
                 print(line_id)
                 self.ui.progressBar.setValue((int(line_id)/Constants.NUM_TEST_ITERATIONS) * 100)
                 self.ui.label_progress.setText(str(line_id) + '/' + str(Constants.NUM_TEST_ITERATIONS))
-                self.ui.label_last_measured_time.setText(str(line).split(',')[2])
+                self.ui.label_last_measured_time.setText(str(line).split(',')[2].replace("\\n'", '') + 'ms')
 
             if len(line) is 0:
                 break

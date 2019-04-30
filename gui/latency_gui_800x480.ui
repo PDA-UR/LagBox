@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>720</width>
+    <width>800</width>
     <height>480</height>
    </rect>
   </property>
@@ -17,7 +17,7 @@
    <widget class="QPushButton" name="button_refresh">
     <property name="geometry">
      <rect>
-      <x>590</x>
+      <x>680</x>
       <y>120</y>
       <width>91</width>
       <height>31</height>
@@ -86,7 +86,7 @@
      <rect>
       <x>190</x>
       <y>180</y>
-      <width>391</width>
+      <width>481</width>
       <height>31</height>
      </rect>
     </property>
@@ -101,8 +101,8 @@
      <rect>
       <x>20</x>
       <y>286</y>
-      <width>741</width>
-      <height>31</height>
+      <width>751</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
@@ -128,7 +128,7 @@ Therefore it can be changed here</string>
      <rect>
       <x>190</x>
       <y>250</y>
-      <width>491</width>
+      <width>581</width>
       <height>31</height>
      </rect>
     </property>
@@ -149,7 +149,7 @@ Therefore it can be changed here</string>
      <rect>
       <x>190</x>
       <y>120</y>
-      <width>391</width>
+      <width>481</width>
       <height>31</height>
      </rect>
     </property>
@@ -162,9 +162,9 @@ Therefore it can be changed here</string>
    <widget class="QLabel" name="label_title">
     <property name="geometry">
      <rect>
-      <x>70</x>
+      <x>0</x>
       <y>0</y>
-      <width>561</width>
+      <width>781</width>
       <height>61</height>
      </rect>
     </property>
@@ -224,7 +224,7 @@ Therefore it can be changed here</string>
      <rect>
       <x>190</x>
       <y>340</y>
-      <width>491</width>
+      <width>581</width>
       <height>31</height>
      </rect>
     </property>
@@ -278,7 +278,7 @@ Therefore it can be changed here</string>
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>701</width>
+      <width>781</width>
       <height>61</height>
      </rect>
     </property>
@@ -302,7 +302,7 @@ Therefore it can be changed here</string>
      <rect>
       <x>50</x>
       <y>250</y>
-      <width>581</width>
+      <width>661</width>
       <height>111</height>
      </rect>
     </property>
@@ -341,7 +341,7 @@ The next button you press will be used for the measurement.
    <widget class="QLabel" name="label_selected_device_description">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>60</x>
       <y>110</y>
       <width>331</width>
       <height>21</height>
@@ -361,7 +361,7 @@ The next button you press will be used for the measurement.
    <widget class="QLabel" name="label_selected_device_type_description">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>60</x>
       <y>130</y>
       <width>331</width>
       <height>21</height>
@@ -381,7 +381,7 @@ The next button you press will be used for the measurement.
    <widget class="QLabel" name="label_pressed_button_id_description">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>60</x>
       <y>170</y>
       <width>331</width>
       <height>21</height>
@@ -401,7 +401,7 @@ The next button you press will be used for the measurement.
    <widget class="QLabel" name="label_selected_device">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>260</x>
       <y>110</y>
       <width>451</width>
       <height>21</height>
@@ -419,7 +419,7 @@ The next button you press will be used for the measurement.
    <widget class="QLabel" name="label_selected_device_type">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>260</x>
       <y>130</y>
       <width>451</width>
       <height>21</height>
@@ -437,7 +437,7 @@ The next button you press will be used for the measurement.
    <widget class="QLabel" name="label_pressed_button_id">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>260</x>
       <y>170</y>
       <width>451</width>
       <height>21</height>
@@ -459,7 +459,7 @@ The next button you press will be used for the measurement.
      <rect>
       <x>40</x>
       <y>100</y>
-      <width>641</width>
+      <width>691</width>
       <height>50</height>
      </rect>
     </property>
@@ -475,9 +475,9 @@ The next button you press will be used for the measurement.
    <widget class="QLabel" name="label_title_3">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>0</x>
       <y>0</y>
-      <width>651</width>
+      <width>781</width>
       <height>61</height>
      </rect>
     </property>
@@ -499,7 +499,7 @@ The next button you press will be used for the measurement.
    <widget class="QLabel" name="label_progress">
     <property name="geometry">
      <rect>
-      <x>530</x>
+      <x>580</x>
       <y>150</y>
       <width>151</width>
       <height>41</height>
@@ -524,13 +524,13 @@ The next button you press will be used for the measurement.
      <rect>
       <x>10</x>
       <y>230</y>
-      <width>691</width>
+      <width>751</width>
       <height>151</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>80</pointsize>
+      <pointsize>72</pointsize>
      </font>
     </property>
     <property name="text">
@@ -545,9 +545,9 @@ The next button you press will be used for the measurement.
    <widget class="QLabel" name="label_title_4">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>0</x>
       <y>0</y>
-      <width>681</width>
+      <width>781</width>
       <height>61</height>
      </rect>
     </property>
@@ -571,7 +571,7 @@ The next button you press will be used for the measurement.
      <rect>
       <x>30</x>
       <y>100</y>
-      <width>621</width>
+      <width>711</width>
       <height>101</height>
      </rect>
     </property>
@@ -594,7 +594,7 @@ The results are saved under
      <rect>
       <x>30</x>
       <y>260</y>
-      <width>651</width>
+      <width>701</width>
       <height>101</height>
      </rect>
     </property>
@@ -615,7 +615,7 @@ The results are saved under
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>230</x>
+      <x>260</x>
       <y>230</y>
       <width>251</width>
       <height>31</height>
@@ -642,7 +642,7 @@ The results are saved under
      <rect>
       <x>10</x>
       <y>80</y>
-      <width>691</width>
+      <width>751</width>
       <height>161</height>
      </rect>
     </property>
@@ -665,9 +665,9 @@ All crowdsourced data can be found on</string>
    <widget class="QLabel" name="label_title_5">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>0</x>
       <y>0</y>
-      <width>681</width>
+      <width>781</width>
       <height>61</height>
      </rect>
     </property>
@@ -691,7 +691,7 @@ All crowdsourced data can be found on</string>
      <rect>
       <x>50</x>
       <y>290</y>
-      <width>601</width>
+      <width>671</width>
       <height>51</height>
      </rect>
     </property>
@@ -715,7 +715,7 @@ just press &quot;Finish&quot; to exit the application</string>
      <rect>
       <x>190</x>
       <y>64</y>
-      <width>491</width>
+      <width>581</width>
       <height>31</height>
      </rect>
     </property>
@@ -754,7 +754,7 @@ just press &quot;Finish&quot; to exit the application</string>
      <rect>
       <x>20</x>
       <y>90</y>
-      <width>721</width>
+      <width>751</width>
       <height>51</height>
      </rect>
     </property>
@@ -768,7 +768,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
      <rect>
       <x>190</x>
       <y>180</y>
-      <width>491</width>
+      <width>581</width>
       <height>31</height>
      </rect>
     </property>
@@ -789,7 +789,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
      <rect>
       <x>20</x>
       <y>200</y>
-      <width>721</width>
+      <width>741</width>
       <height>41</height>
      </rect>
     </property>
@@ -856,7 +856,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
      <rect>
       <x>20</x>
       <y>280</y>
-      <width>721</width>
+      <width>741</width>
       <height>21</height>
      </rect>
     </property>
@@ -869,7 +869,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
      <rect>
       <x>20</x>
       <y>310</y>
-      <width>661</width>
+      <width>751</width>
       <height>91</height>
      </rect>
     </property>
@@ -899,7 +899,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
      <rect>
       <x>60</x>
       <y>130</y>
-      <width>591</width>
+      <width>661</width>
       <height>111</height>
      </rect>
     </property>
@@ -920,7 +920,7 @@ All crowdsourced data can be found on</string>
    <widget class="QLabel" name="label_8">
     <property name="geometry">
      <rect>
-      <x>230</x>
+      <x>260</x>
       <y>240</y>
       <width>251</width>
       <height>31</height>
@@ -947,7 +947,7 @@ All crowdsourced data can be found on</string>
      <rect>
       <x>0</x>
       <y>10</y>
-      <width>691</width>
+      <width>771</width>
       <height>61</height>
      </rect>
     </property>
