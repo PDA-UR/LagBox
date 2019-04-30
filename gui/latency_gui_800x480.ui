@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>680</x>
-      <y>120</y>
+      <y>80</y>
       <width>91</width>
       <height>31</height>
      </rect>
@@ -36,9 +36,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>170</y>
+      <y>150</y>
       <width>181</width>
-      <height>41</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="font">
@@ -54,7 +54,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>210</y>
+      <y>180</y>
       <width>741</width>
       <height>21</height>
      </rect>
@@ -62,30 +62,15 @@
     <property name="text">
      <string>Select the kind of device yout want to use for measurements.</string>
     </property>
-   </widget>
-   <widget class="QLabel" name="label_new_measurement">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>70</y>
-      <width>281</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>22</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>New measurement:</string>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
     </property>
    </widget>
    <widget class="QComboBox" name="comboBox_device_type">
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>180</y>
+      <y>150</y>
       <width>481</width>
       <height>31</height>
      </rect>
@@ -100,21 +85,24 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>286</y>
+      <y>266</y>
       <width>751</width>
-      <height>41</height>
+      <height>51</height>
      </rect>
     </property>
     <property name="text">
      <string>(Optional) The device name provided by the hardware does not always represent the the actual name. 
 Therefore it can be changed here</string>
     </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+    </property>
    </widget>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>150</y>
+      <y>110</y>
       <width>741</width>
       <height>21</height>
      </rect>
@@ -122,12 +110,15 @@ Therefore it can be changed here</string>
     <property name="text">
      <string>Select the device yout want to use for measurements.</string>
     </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+    </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_device_name">
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>250</y>
+      <y>230</y>
       <width>581</width>
       <height>31</height>
      </rect>
@@ -148,7 +139,7 @@ Therefore it can be changed here</string>
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>120</y>
+      <y>80</y>
       <width>481</width>
       <height>31</height>
      </rect>
@@ -187,9 +178,9 @@ Therefore it can be changed here</string>
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>110</y>
+      <y>80</y>
       <width>181</width>
-      <height>41</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="font">
@@ -205,9 +196,9 @@ Therefore it can be changed here</string>
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>240</y>
+      <y>230</y>
       <width>181</width>
-      <height>41</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="font">
@@ -223,7 +214,7 @@ Therefore it can be changed here</string>
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>340</y>
+      <y>320</y>
       <width>581</width>
       <height>31</height>
      </rect>
@@ -244,22 +235,26 @@ Therefore it can be changed here</string>
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>370</y>
+      <y>350</y>
       <width>741</width>
-      <height>31</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>(Optional) Enter the European Article Numer/ Universal Product Code to make it easier for others to find your device.</string>
+     <string>(Optional) Enter the European Article Numer/ Universal Product Code
+to make it easier for others to find your device.</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
     </property>
    </widget>
    <widget class="QLabel" name="label_ean_upc">
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>330</y>
+      <y>320</y>
       <width>181</width>
-      <height>41</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="font">
@@ -301,8 +296,8 @@ Therefore it can be changed here</string>
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>250</y>
-      <width>661</width>
+      <y>210</y>
+      <width>671</width>
       <height>111</height>
      </rect>
     </property>
@@ -324,14 +319,14 @@ The next button you press will be used for the measurement.
     <property name="geometry">
      <rect>
       <x>240</x>
-      <y>460</y>
+      <y>350</y>
       <width>291</width>
-      <height>51</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>16</pointsize>
+      <pointsize>14</pointsize>
      </font>
     </property>
     <property name="text">
@@ -459,7 +454,7 @@ The next button you press will be used for the measurement.
      <rect>
       <x>40</x>
       <y>100</y>
-      <width>691</width>
+      <width>700</width>
       <height>50</height>
      </rect>
     </property>
@@ -523,7 +518,7 @@ The next button you press will be used for the measurement.
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>230</y>
+      <y>250</y>
       <width>751</width>
       <height>151</height>
      </rect>
@@ -535,6 +530,27 @@ The next button you press will be used for the measurement.
     </property>
     <property name="text">
      <string>0.000ms</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_press_button_again">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>210</y>
+      <width>781</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Press the button of your device one more time to start the measurement</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -702,7 +718,7 @@ All crowdsourced data can be found on</string>
     </property>
     <property name="text">
      <string>If you do not want to share your measurements,
-just press &quot;Finish&quot; to exit the application</string>
+just press &quot;Finish without uploading results&quot; to exit the application</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -753,21 +769,24 @@ just press &quot;Finish&quot; to exit the application</string>
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>90</y>
+      <y>100</y>
       <width>751</width>
-      <height>51</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
      <string>(Optional) Please provide your name(s) so that you are set as the author of the current measurement.
 If you want your name(s) to appear on the results page, please check the checkbox below.</string>
     </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+    </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_email">
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>180</y>
+      <y>190</y>
       <width>581</width>
       <height>31</height>
      </rect>
@@ -788,20 +807,23 @@ If you want your name(s) to appear on the results page, please check the checkbo
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>200</y>
+      <y>220</y>
       <width>741</width>
-      <height>41</height>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
      <string>(Optional) Please provide an email adress so that we can get in contact with you. It will never be published.</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
     </property>
    </widget>
    <widget class="QLabel" name="label_authors_2">
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>180</y>
+      <y>190</y>
       <width>211</width>
       <height>31</height>
      </rect>
@@ -819,7 +841,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>140</y>
+      <y>150</y>
       <width>641</width>
       <height>22</height>
      </rect>
@@ -837,7 +859,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>250</y>
+      <y>260</y>
       <width>211</width>
       <height>31</height>
      </rect>
@@ -855,7 +877,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>280</y>
+      <y>290</y>
       <width>741</width>
       <height>21</height>
      </rect>
@@ -863,14 +885,17 @@ If you want your name(s) to appear on the results page, please check the checkbo
     <property name="text">
      <string>(Optional) If there is anything you want to share with us, please write it down here.</string>
     </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+    </property>
    </widget>
    <widget class="QPlainTextEdit" name="plainTextEdit_additional_notes">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>310</y>
+      <y>320</y>
       <width>751</width>
-      <height>91</height>
+      <height>81</height>
      </rect>
     </property>
    </widget>
