@@ -116,6 +116,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.label_selected_device.setText(self.ui.lineEdit_device_name.text())
         self.ui.label_selected_device_type.setText(str(self.ui.comboBox_device_type.currentText()))
 
+        self.ui.button_restart_measurement.setEnabled(True)
         self.listen_for_key_inputs()
 
     # User interface for page three (Page where the LagBox measurement takes place)
@@ -160,6 +161,8 @@ class LatencyGUI(QtWidgets.QWizard):
             self.timer.stop()
             print('Stopped timer because back button was pressed')
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
 
     # Fills the combobox with all possible device types defined in the constants
     def init_combobox_device_type(self, auto_detected_value):
