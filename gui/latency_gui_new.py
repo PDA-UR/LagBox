@@ -13,10 +13,10 @@ import time
 # from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton
 #from PyQt5.QtGui import QIcon
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
+#from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+#from matplotlib.figure import Figure
 
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 # import seaborn as sns
 
 import random
@@ -35,44 +35,46 @@ class Constants:
 
 
 # Parts of code of following class based on https://pythonspot.com/pyqt5-matplotlib/
-class PlotCanvas(FigureCanvas):
-
-    def __init__(self, parent=None):
-        print('Init plot')
-        fig = Figure(figsize=(7, 3), dpi=100)
-        #self.axes = fig.add_subplot(111)
-
-        FigureCanvas.__init__(self, fig)
-        self.setParent(parent)
-
-        FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-        self.plot()
-
-    def plot(self):
-        latencies = [random.random() for i in range(25)]
-        # ax = self.figure.add_subplot(111)
-        # ax.plot(data, 'r-')
-        # ax.set_title('PyQt Matplotlib Example')
-        # self.draw()
-
-        plt.rcParams.update({'font.size': Constants.PLOT_FONTSIZE})
-        plt.figure(figsize=[Constants.PLOT_WIDTH, Constants.PLOT_HEIGHT])
-        ax = sns.swarmplot(x=latencies, hue=None, palette="colorblind", dodge=True, marker="H", orient="h", alpha=1,
-                           zorder=0)
-        self.draw()
-
-        # plt.title("TEST")
-        plt.xlabel("latency (ms)")
-        plt.xlim(Constants.PLOT_X_MIN, Constants.PLOT_X_MAX)
-
-        axes = plt.gca()
+# class PlotCanvas(FigureCanvas):
+#
+#     def __init__(self, parent=None):
+#         print('Init plot')
+#         fig = Figure(figsize=(7, 3), dpi=100)
+#         #self.axes = fig.add_subplot(111)
+#
+#         FigureCanvas.__init__(self, fig)
+#         self.setParent(parent)
+#
+#         FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+#         FigureCanvas.updateGeometry(self)
+#         self.plot()
+#
+#     def plot(self):
+#         latencies = [random.random() for i in range(25)]
+#         # ax = self.figure.add_subplot(111)
+#         # ax.plot(data, 'r-')
+#         # ax.set_title('PyQt Matplotlib Example')
+#         # self.draw()
+#
+#         plt.rcParams.update({'font.size': Constants.PLOT_FONTSIZE})
+#         plt.figure(figsize=[Constants.PLOT_WIDTH, Constants.PLOT_HEIGHT])
+#         ax = sns.swarmplot(x=latencies, hue=None, palette="colorblind", dodge=True, marker="H", orient="h", alpha=1,
+#                            zorder=0)
+#         self.draw()
+#
+#         # plt.title("TEST")
+#         plt.xlabel("latency (ms)")
+#         plt.xlim(Constants.PLOT_X_MIN, Constants.PLOT_X_MAX)
+#
+#         axes = plt.gca()
 
 
 class LatencyGUI(QtWidgets.QWizard):
 
     device_objects = []
     device_id = -1
+    button_code = -1
+    device_name = ''
 
     timer = None
 
@@ -102,6 +104,9 @@ class LatencyGUI(QtWidgets.QWizard):
     # User interface for page two (Page where the detection of the input button takes place)
     def init_ui_page_two(self):
         print('Init UI page 2')
+
+        self.validate_inputs()
+
         self.ui.button_restart_measurement.clicked.connect(self.listen_for_key_inputs)
 
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_two)
@@ -129,6 +134,13 @@ class LatencyGUI(QtWidgets.QWizard):
 
         self.ui.button(QtWidgets.QWizard.BackButton).clicked.disconnect(self.on_page_two_back_button_pressed)
 
+        #self.ui.progressBar.setValue(0)
+        #self.ui.label_progress.setText('0/100')
+        timer_test = QTimer(self)
+        timer_test.setSingleShot(True)
+        timer_test.timeout.connect(self.start_measurement)
+        timer_test.start(100)
+
     # User interface for page four (Page that displays the results of the lagbox measurement)
     def init_ui_page_four(self):
         print('Init UI page 4')
@@ -138,7 +150,7 @@ class LatencyGUI(QtWidgets.QWizard):
     # User interface for page five (Page that askes the user if he wants to upload the measurements)
     def init_ui_page_five(self):
         print('Init UI page 5')
-        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Upload Results')
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Continue to Upload Results')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_five)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_six)
 
@@ -149,6 +161,7 @@ class LatencyGUI(QtWidgets.QWizard):
     def init_ui_page_six(self):
         print('Init UI page 6')
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Cancel Upload and Exit')
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Upload Results')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_six)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_seven)
         # TODO: Prefill the author field and maybe even the email field with information saved in a .ini file
@@ -194,13 +207,13 @@ class LatencyGUI(QtWidgets.QWizard):
         # Copy the name of the device into the text field to allow the user to change the displayed name
         self.ui.lineEdit_device_name.setText(str(self.ui.comboBox_device.currentText()))
 
-        #
+        # Iterate through list of available devices until the one that is currently selected is found
         for device in self.device_objects:
             if device.name == self.ui.comboBox_device.currentText():
                 self.device_id = device.device_id
                 self.init_combobox_device_type(device.device_type)
 
-                break
+                break  # No need to continue after correct device is found
 
     def listen_for_key_inputs(self):
         if self.ui.button_restart_measurement.isEnabled():
@@ -214,11 +227,11 @@ class LatencyGUI(QtWidgets.QWizard):
 
     def validate_inputs(self):
         #authors = self.ui.lineEdit_authors.text()
-        device_name = self.ui.lineEdit_device_name.text()
+        self.device_name = self.ui.lineEdit_device_name.text()
         device_type = str(self.ui.comboBox_device_type.currentText())
 
         #print("Authors: ", authors)
-        print("Device name: ", device_name)
+        print("Device name: ", self.device_name)
         print("Device type: ", device_type)
 
     def get_connected_devices(self):
@@ -296,9 +309,9 @@ class LatencyGUI(QtWidgets.QWizard):
                     if event.type == evdev.ecodes.EV_KEY:  # Check if the current event is a button press
                         key_event = evdev.categorize(event)
                         if key_event.keystate:  # Check if button is pressed down
-                            button_code = key_event.scancode
-                            print('ID of pressed button: ', button_code)
-                            self.ui.label_pressed_button_id.setText(str(button_code))
+                            self.button_code = key_event.scancode
+                            print('ID of pressed button: ', self.button_code)
+                            self.ui.label_pressed_button_id.setText(str(self.button_code))
                             self.timer.stop()  # Stop the timer so that this function is not called again
                             self.ui.button_restart_measurement.setText('Restart Button Detection')
                             self.ui.button_restart_measurement.setEnabled(True)
@@ -313,17 +326,25 @@ class LatencyGUI(QtWidgets.QWizard):
             print(error)  # TODO: Check if this error can happen on a Raspberry Pi
 
     def start_measurement(self):
-        pass
+
         # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
-        # command = 'ping google.com -c 5'
-        # process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
-        #
-        # for line in iter(process.stdout.readline, ''):
-        #     if len(line) is 0:
-        #         break
-        #     print(line)
-        #
-        # print("Reached end of loop")
+        #command = 'ping google.com -c 10'
+        command = '../bin/inputLatencyMeasureTool -m 3 -b' + str(self.button_code) + ' -d 2 -event ' + str(self.device_id) + ' -name ' + 'Test Vitus 03'
+        process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+
+        progress = 0
+
+        for line in iter(process.stdout.readline, ''):
+            progress += 10
+            self.ui.progressBar.setValue(progress)
+            self.ui.label_progress.setText(str(progress) + '/100')
+            self.ui.label_last_measured_time.setText(str(line))
+
+            #if len(line) is 0:
+            #    break
+            print(line)
+
+        print("Reached end of loop")
 
 
 class Device:
