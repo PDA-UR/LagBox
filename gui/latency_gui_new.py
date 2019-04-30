@@ -217,7 +217,7 @@ class LatencyGUI(QtWidgets.QWizard):
         # Iterate through list of available devices until the one that is currently selected is found
         for device in self.device_objects:
             if device.name == self.ui.comboBox_device.currentText():
-                self.device_id = device.device_id.replace('Handlers=', '')
+                self.device_id = device.device_id.replace('Handlers=', '').replace("\\n'", '')
                 self.init_combobox_device_type(device.device_type)
 
                 break  # No need to continue after correct device is found
@@ -235,6 +235,9 @@ class LatencyGUI(QtWidgets.QWizard):
     def validate_inputs(self):
         #authors = self.ui.lineEdit_authors.text()
         self.device_name = self.ui.lineEdit_device_name.text()
+
+        # TODO: Remove all non-allowed chars from device name and set a maximum length for the string
+
         self.device_type = Constants.DEVICE_TYPE_IDS[str(self.ui.comboBox_device_type.currentText()).replace(' (auto-detected)', '')]
 
         #print("Authors: ", authors)
@@ -281,7 +284,6 @@ class LatencyGUI(QtWidgets.QWizard):
                 name = device[1].replace('"', '').replace('N: Name=', '')
                 device_id = self.get_device_id(device[5])
                 device_type_auto_detected = self.get_device_type(device[5])
-                # print('Device type:', device_type)
                 device_names.append(name)
                 self.device_objects.append(Device(vendor_id, product_id, name, device_id, device_type_auto_detected))
 
@@ -332,9 +334,8 @@ class LatencyGUI(QtWidgets.QWizard):
         except PermissionError as error:
             print(error)  # TODO: Check if this error can happen on a Raspberry Pi
 
+    # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
     def start_measurement(self):
-
-        # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
         #command = 'ping google.com -c 10'
         command = '../bin/inputLatencyMeasureTool' + \
                   ' -m ' + str(Constants.MODE) + \
@@ -342,7 +343,7 @@ class LatencyGUI(QtWidgets.QWizard):
                   ' -d ' + str(self.device_type) + \
                   ' -event ' + str(self.device_id).replace('event', '') + \
                   ' -n ' + str(Constants.NUM_TEST_ITERATIONS) + \
-                  ' -name ' + self.device_name
+                  " -name '" + self.device_name + "'"
 
         print(command)
 
@@ -353,20 +354,20 @@ class LatencyGUI(QtWidgets.QWizard):
 
         for line in iter(process.stdout.readline, ''):
             print(line)
-            line_id = str(line).split(',')[0].replace("b'", '')
-            if line_id.isdigit():
-                print(line_id)
+            line_id = str(line).split(',')[0].replace("b'", '')  # Convert line to String and remove the leading "b'"
+            if line_id.isdigit():  # Only count the progress if the line is actually the result of a measurement
                 self.ui.label_press_button_again.setText('')
-                self.ui.progressBar.setValue((int(line_id)/Constants.NUM_TEST_ITERATIONS) * 100)
+                self.ui.progressBar.setValue((int(line_id) / Constants.NUM_TEST_ITERATIONS) * 100)
                 self.ui.label_progress.setText(str(line_id) + '/' + str(Constants.NUM_TEST_ITERATIONS))
                 self.ui.label_last_measured_time.setText(str(line).split(',')[2].replace("\\n'", '') + 'ms')
 
             if len(line) is 0:
-                break
+                break  # As soon as no more data is sent, stdout will only return empty lines
 
         print("Reached end of loop")
 
 
+# An object representation of all relevant data about connected USB device
 class Device:
 
     def __init__(self, vendor_id, product_id, name, device_id, device_type):
