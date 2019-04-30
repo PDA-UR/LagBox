@@ -22,7 +22,6 @@ from matplotlib import pyplot as plt
 import random
 
 
-
 class Constants:
     UI_FILE = 'latency_gui.ui'
     DEVICE_TYPES = ['Gamepad', 'Mouse', 'Keyboard']
@@ -98,16 +97,12 @@ class LatencyGUI(QtWidgets.QWizard):
         self.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
         self.ui.button_refresh.clicked.connect(self.get_connected_devices)
         self.ui.comboBox_device.currentIndexChanged.connect(self.on_combobox_device_changed)
-        #self.ui.lineEdit_authors.setText(os.environ['USER'])
         self.get_connected_devices()
 
     # User interface for page two (Page where the detection of the input button takes place)
     def init_ui_page_two(self):
         print('Init UI page 2')
         self.ui.button_restart_measurement.clicked.connect(self.listen_for_key_inputs)
-
-        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Start Measurement')
-        self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)  # Disable the button until the keycode has been found out
 
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_two)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_three)
@@ -116,6 +111,10 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.label_selected_device.setText(self.ui.lineEdit_device_name.text())
         self.ui.label_selected_device_type.setText(str(self.ui.comboBox_device_type.currentText()))
 
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Start Measurement')
+        # Disable the button until the keycode has been found out
+        self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
+
         self.ui.button_restart_measurement.setEnabled(True)
         self.listen_for_key_inputs()
 
@@ -123,9 +122,12 @@ class LatencyGUI(QtWidgets.QWizard):
     def init_ui_page_three(self):
         print('Init UI page 3')
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
+        # TODO: Disable this button by default until measurement is finished
         self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_four)
+
+        self.ui.button(QtWidgets.QWizard.BackButton).clicked.disconnect(self.on_page_two_back_button_pressed)
 
     # User interface for page four (Page that displays the results of the lagbox measurement)
     def init_ui_page_four(self):
@@ -143,25 +145,33 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish')
         # self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.quit_application)
 
-    def init_ui_page_six(self):
-        print('Init UI page 6')
-        pass
-
     # User interface for page six (Page where data about uploading the data is collected)
     def init_ui_page_six(self):
+        print('Init UI page 6')
+        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Cancel Upload and Exit')
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_six)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_seven)
         # TODO: Prefill the author field and maybe even the email field with information saved in a .ini file
-        pass
+        self.ui.lineEdit_authors.setText(os.environ['USER'])
 
-    def on_page_two_next_button_pressed(self):
-        pass
-        #self.init_ui_page_three()
+    # User interface for page seven (Page where The user is thanked for its participation)
+    def init_ui_page_seven(self):
+        print('Init UI page 7')
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next')
+        self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
+        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish')
 
+    # Stop key detection if the user presses the back button and reconnect the "NextButton" to the correct function call
     def on_page_two_back_button_pressed(self):
         if self.timer is not None and self.timer.isActive():
             self.timer.stop()
             print('Stopped timer because back button was pressed')
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
+
+        try:
+            self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
+        except TypeError:
+            print('back button was pressed before UI was loaded completely. No need to worry')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
 
     # Fills the combobox with all possible device types defined in the constants
@@ -273,6 +283,8 @@ class LatencyGUI(QtWidgets.QWizard):
             return 'Gamepad (auto-detected)'
         return None
 
+    # This function will listen for all key inputs of a given device. As soon as the first key-down press is detected,
+    # The detection loop will end.
     def scan_key_inputs(self):
         try:
             device = evdev.InputDevice('/dev/input/' + str(self.device_id))
