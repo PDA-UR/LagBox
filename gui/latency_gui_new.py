@@ -35,6 +35,7 @@ class Constants:
     PLOT_HEIGHT = 4
     PLOT_FONTSIZE = 18
 
+    MODE = 3  # (0 = stepper mode, 1 = stepper latency test mode, 2 = stepper reset mode, 3 = auto mode, 4 = pressure sensor test mode)
     NUM_TEST_ITERATIONS = 100
 
 
@@ -335,17 +336,27 @@ class LatencyGUI(QtWidgets.QWizard):
 
         # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
         #command = 'ping google.com -c 10'
-        command = '../bin/inputLatencyMeasureTool -m 3 -b ' + str(self.button_code) + ' -d 2 -event ' + str(self.device_id).replace('event', '') + ' -name ' + "'Test Vitus 07'"
+        command = '../bin/inputLatencyMeasureTool' + \
+                  ' -m ' + str(Constants.MODE) + \
+                  ' -b ' + str(self.button_code) + \
+                  ' -d ' + str(self.device_type) + \
+                  ' -event ' + str(self.device_id).replace('event', '') + \
+                  ' -n ' + str(Constants.NUM_TEST_ITERATIONS) + \
+                  ' -name ' + self.device_name
 
         print(command)
 
         process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+
+        # TODO: If the user has selected the wrong button, the UI will freeze.
+        # Therefore the measurement needs to be cancelled after a certain amount of time
 
         for line in iter(process.stdout.readline, ''):
             print(line)
             line_id = str(line).split(',')[0].replace("b'", '')
             if line_id.isdigit():
                 print(line_id)
+                self.ui.label_press_button_again.setText('')
                 self.ui.progressBar.setValue((int(line_id)/Constants.NUM_TEST_ITERATIONS) * 100)
                 self.ui.label_progress.setText(str(line_id) + '/' + str(Constants.NUM_TEST_ITERATIONS))
                 self.ui.label_last_measured_time.setText(str(line).split(',')[2].replace("\\n'", '') + 'ms')
