@@ -23,7 +23,8 @@ import random
 
 
 class Constants:
-    UI_FILE = 'latency_gui.ui'
+    #UI_FILE = 'latency_gui.ui'
+    UI_FILE = 'latency_gui_720x480.ui'
     DEVICE_TYPES = ['Gamepad', 'Mouse', 'Keyboard']
     WINDOW_TITLE = 'LagBox'
 
@@ -88,7 +89,7 @@ class LatencyGUI(QtWidgets.QWizard):
     def init_ui(self):
         self.ui = uic.loadUi(Constants.UI_FILE, self)
         self.setWindowTitle(Constants.WINDOW_TITLE)
-        # self.showFullScreen()
+        self.showFullScreen()
 
         #dataplot = PlotCanvas(self)
         #dataplot.move(50, 100)
