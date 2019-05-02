@@ -588,7 +588,7 @@ The next button you press will be used for the measurement.
       <x>30</x>
       <y>100</y>
       <width>711</width>
-      <height>101</height>
+      <height>61</height>
      </rect>
     </property>
     <property name="font">
@@ -598,8 +598,7 @@ The next button you press will be used for the measurement.
     </property>
     <property name="text">
      <string>Measurement finished successfully. 
-The results are saved under 
-[PATH NAME]</string>
+The results are saved under</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -609,7 +608,7 @@ The results are saved under
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>260</y>
+      <y>270</y>
       <width>701</width>
       <height>101</height>
      </rect>
@@ -621,6 +620,29 @@ The results are saved under
     </property>
     <property name="text">
      <string>[PLACE PLOT HERE]</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_path_name">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>170</y>
+      <width>711</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>18</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>[PATH NAME]</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>

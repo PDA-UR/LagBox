@@ -153,6 +153,9 @@ class LatencyGUI(QtWidgets.QWizard):
         print('Init UI page 4')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_four)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_five)
+        
+        # Path where the log will be saved
+        self.ui.label_path_name.setText(os.path.dirname(os.path.realpath(__file__)).replace('gui', 'log'))
 
     # User interface for page five (Page that askes the user if he wants to upload the measurements)
     def init_ui_page_five(self):
@@ -224,6 +227,7 @@ class LatencyGUI(QtWidgets.QWizard):
 
     def listen_for_key_inputs(self):
         if self.ui.button_restart_measurement.isEnabled():
+            self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
             self.ui.button_restart_measurement.setText('Measuring...')
             self.ui.button_restart_measurement.setEnabled(False)
             print("Starting measurement")
