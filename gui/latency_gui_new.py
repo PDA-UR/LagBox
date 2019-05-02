@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtWidgets, uic
+from PyQt5.QtGui import QIcon, QPixmap
+
 from PyQt5.QtCore import QTimer
 import sys
 from subprocess import Popen, PIPE, STDOUT
@@ -78,6 +80,7 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # User interface for page one (Page where general settings are placed)
     def init_ui_page_one(self):
+
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
         self.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
         self.button(QtWidgets.QWizard.BackButton).hide()
@@ -126,60 +129,38 @@ class LatencyGUI(QtWidgets.QWizard):
         # Path where the log will be saved
         self.ui.label_path_name.setText(os.path.dirname(os.path.realpath(__file__)).replace('gui', 'log'))
 
+        # self.ui.label_image.setPixmap(QPixmap('dinoGame.png'))
+
         self.init_plot()
 
     # User interface for page five (Page that askes the user if he wants to upload the measurements)
     def init_ui_page_five(self):
         print('Init Ui Page 5')
 
-        self.setOption(QtWidgets.QWizard.HaveCustomButton1, True)
-        self.setOption(QtWidgets.QWizard.HaveCustomButton2, True)
-
-        self.ui.setButtonText(QtWidgets.QWizard.CustomButton1, 'Finish without uploading results')
-        self.ui.setButtonText(QtWidgets.QWizard.CustomButton2, 'Continue to Upload Results')
-
-        self.button(QtWidgets.QWizard.CustomButton1).clicked.connect(self.finish)
-        self.button(QtWidgets.QWizard.CustomButton2).clicked.connect(self.continue_to_upload_measurements)
-
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Continue to Upload Results')
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_five)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_six)
         self.button(QtWidgets.QWizard.BackButton).hide()
-        self.button(QtWidgets.QWizard.NextButton).hide()
-        self.button(QtWidgets.QWizard.CancelButton).hide()
 
-    def continue_to_upload_measurements(self):
-        self.init_ui_page_six()
-        self.next()
-
-    def finish(self):
-        self.done(0)
+        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish without uploading results')
 
     # User interface for page six (Page where data about uploading the data is collected)
     def init_ui_page_six(self):
-        print('Init Ui Page 6')
-
-        self.ui.setButtonText(QtWidgets.QWizard.CustomButton1, 'Cancel Upload and Exit')
-        self.ui.setButtonText(QtWidgets.QWizard.CustomButton2, 'Upload Results')
-
-        self.button(QtWidgets.QWizard.CustomButton2).clicked.disconnect(self.continue_to_upload_measurements)
-        self.button(QtWidgets.QWizard.CustomButton2).clicked.connect(self.on_page_six_next_button_pressed)
-
+        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Cancel Upload and Exit')
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Upload Results')
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_six)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.on_page_six_next_button_pressed)
         self.button(QtWidgets.QWizard.BackButton).hide()
-        self.button(QtWidgets.QWizard.NextButton).hide()
-        self.button(QtWidgets.QWizard.CancelButton).hide()
-
 
         # TODO: Prefill the author field and maybe even the email field with information saved in a .ini file
         self.ui.lineEdit_authors.setText(os.environ['USER'])
 
-    # User interface for page seven (Page where The user is thanked for its participation)
-    def init_ui_page_seven(self):
-        print('Init Ui Page 6')
-        self.button(QtWidgets.QWizard.CustomButton1).hide()
-        self.button(QtWidgets.QWizard.CustomButton2).hide()
+        # User interface for page seven (Page where The user is thanked for its participation)
 
+    def init_ui_page_seven(self):
         self.button(QtWidgets.QWizard.NextButton).hide()
         self.button(QtWidgets.QWizard.BackButton).hide()
         self.button(QtWidgets.QWizard.CancelButton).hide()
-
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish')
 
     # Stop key detection if the user presses the back button and reconnect the "NextButton" to the correct function call
