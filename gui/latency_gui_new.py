@@ -59,14 +59,16 @@ class LatencyGUI(QtWidgets.QWizard):
     def init_ui(self):
         self.ui = uic.loadUi(Constants.UI_FILE, self)
         self.setWindowTitle(Constants.WINDOW_TITLE)
-        self.showFullScreen()
 
+        #self.layout = QVBoxLayout()
         #self.canvas = FigureCanvas(self.init_plot())
         #self.canvas.setParent(self)
         #self.canvas.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         #self.canvas.updateGeometry()
-        #self.show()
+        # self.canvas.draw()
+        #self.layout.addWidget(self.canvas)
 
+        self.showFullScreen()
         self.show()
         self.init_ui_page_one()
 
