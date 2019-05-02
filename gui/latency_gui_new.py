@@ -269,11 +269,27 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # Create a plot of the latest measurement
     def init_plot(self):
+        return
         tips = sns.load_dataset("tips")
         g = sns.FacetGrid(tips, col="sex", hue="time", palette="Set1",
                           hue_order=["Dinner", "Lunch"])
         g.map(plt.scatter, "total_bill", "tip", edgecolor="w")
         return g.fig
+
+    def save_additional_information_to_csv(self):
+        print('Saving additional information to CSV')
+
+        authors = self.ui.lineEdit_authors.text()
+        publish_names = self.ui.checkBox_allow_name_publishing.isChecked()
+        email = self.ui.lineEdit_email.text()
+        additional_notes = self.ui.plainTextEdit_additional_notes.toPlainText()
+
+        print("Authors: ", authors)
+        print('Publish names', publish_names)
+        print('Email', email)
+        print('Notes', additional_notes)
+
+        self.upload_measurement()
 
     # Upload the newly created .csv file of the latest measurement
     def upload_measurement(self):
