@@ -604,27 +604,6 @@ The results are saved under</string>
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label_measurement_finished_2">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>270</y>
-      <width>701</width>
-      <height>101</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>50</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>[PLACE PLOT HERE]</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_path_name">
     <property name="geometry">
      <rect>
@@ -643,6 +622,27 @@ The results are saved under</string>
     </property>
     <property name="text">
      <string>[PATH NAME]</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_image">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>230</y>
+      <width>731</width>
+      <height>161</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>36</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>[PLACEHOLDER FOR PLOT]</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -968,7 +968,7 @@ All crowdsourced data can be found on</string>
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>240</y>
+      <y>230</y>
       <width>251</width>
       <height>31</height>
      </rect>
