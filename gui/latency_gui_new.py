@@ -10,14 +10,17 @@ import evdev
 import os
 import time
 
-# from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton
-#from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton
+from PyQt5.QtGui import QIcon
 
-#from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-#from matplotlib.figure import Figure
+try:
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+    from matplotlib.figure import Figure
+    from matplotlib import pyplot as plt
+    import seaborn as sns
+except:
+    print('Matplotlib or Seaborn not installed')
 
-#from matplotlib import pyplot as plt
-# import seaborn as sns
 
 import random
 
@@ -38,42 +41,6 @@ class Constants:
     MODE = 3  # (0 = stepper mode, 1 = stepper latency test mode, 2 = stepper reset mode, 3 = auto mode, 4 = pressure sensor test mode)
     NUM_TEST_ITERATIONS = 100
 
-
-# Parts of code of following class based on https://pythonspot.com/pyqt5-matplotlib/
-# class PlotCanvas(FigureCanvas):
-#
-#     def __init__(self, parent=None):
-#         print('Init plot')
-#         fig = Figure(figsize=(7, 3), dpi=100)
-#         #self.axes = fig.add_subplot(111)
-#
-#         FigureCanvas.__init__(self, fig)
-#         self.setParent(parent)
-#
-#         FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-#         FigureCanvas.updateGeometry(self)
-#         self.plot()
-#
-#     def plot(self):
-#         latencies = [random.random() for i in range(25)]
-#         # ax = self.figure.add_subplot(111)
-#         # ax.plot(data, 'r-')
-#         # ax.set_title('PyQt Matplotlib Example')
-#         # self.draw()
-#
-#         plt.rcParams.update({'font.size': Constants.PLOT_FONTSIZE})
-#         plt.figure(figsize=[Constants.PLOT_WIDTH, Constants.PLOT_HEIGHT])
-#         ax = sns.swarmplot(x=latencies, hue=None, palette="colorblind", dodge=True, marker="H", orient="h", alpha=1,
-#                            zorder=0)
-#         self.draw()
-#
-#         # plt.title("TEST")
-#         plt.xlabel("latency (ms)")
-#         plt.xlim(Constants.PLOT_X_MIN, Constants.PLOT_X_MAX)
-#
-#         axes = plt.gca()
-
-
 class LatencyGUI(QtWidgets.QWizard):
 
     device_objects = []
@@ -87,23 +54,28 @@ class LatencyGUI(QtWidgets.QWizard):
     def __init__(self):
         super().__init__()
         self.init_ui()
-        self.init_ui_page_one()
 
     def init_ui(self):
         self.ui = uic.loadUi(Constants.UI_FILE, self)
         self.setWindowTitle(Constants.WINDOW_TITLE)
         self.showFullScreen()
 
-        #dataplot = PlotCanvas(self)
-        #dataplot.move(50, 100)
+        #self.canvas = FigureCanvas(self.init_plot())
+        #self.canvas.setParent(self)
+        #self.canvas.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        #self.canvas.updateGeometry()
+        #self.show()
 
         self.show()
+        self.init_ui_page_one()
+
 
     # User interface for page one (Page where general settings are placed)
     def init_ui_page_one(self):
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
         self.init_combobox_device_type(None)
         self.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
+        self.button(QtWidgets.QWizard.BackButton).hide()
         self.ui.button_refresh.clicked.connect(self.get_connected_devices)
         self.ui.comboBox_device.currentIndexChanged.connect(self.on_combobox_device_changed)
         self.get_connected_devices()
@@ -139,7 +111,8 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_four)
 
-        self.ui.button(QtWidgets.QWizard.BackButton).clicked.disconnect(self.on_page_two_back_button_pressed)
+        self.button(QtWidgets.QWizard.BackButton).hide()
+        # self.ui.button(QtWidgets.QWizard.BackButton).clicked.disconnect(self.on_page_two_back_button_pressed)
 
         #self.ui.progressBar.setValue(0)
         #self.ui.label_progress.setText('0/100')
@@ -153,9 +126,13 @@ class LatencyGUI(QtWidgets.QWizard):
         print('Init UI page 4')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_four)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_five)
-        
+        #self.ui.button(QtWidgets.QWizard.BackButton).setEnabled(False)
+        self.button(QtWidgets.QWizard.BackButton).hide()
+
         # Path where the log will be saved
         self.ui.label_path_name.setText(os.path.dirname(os.path.realpath(__file__)).replace('gui', 'log'))
+
+        # self.init_plot()
 
     # User interface for page five (Page that askes the user if he wants to upload the measurements)
     def init_ui_page_five(self):
@@ -163,6 +140,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Continue to Upload Results')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_five)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_six)
+        self.button(QtWidgets.QWizard.BackButton).hide()
 
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish without uploading results')
         # self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.quit_application)
@@ -173,15 +151,20 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Cancel Upload and Exit')
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Upload Results')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_six)
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_seven)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.on_page_six_next_button_pressed)
+        self.button(QtWidgets.QWizard.BackButton).hide()
+
         # TODO: Prefill the author field and maybe even the email field with information saved in a .ini file
         self.ui.lineEdit_authors.setText(os.environ['USER'])
 
     # User interface for page seven (Page where The user is thanked for its participation)
     def init_ui_page_seven(self):
         print('Init UI page 7')
-        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next')
-        self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
+        self.button(QtWidgets.QWizard.NextButton).hide()
+        self.button(QtWidgets.QWizard.BackButton).hide()
+        self.button(QtWidgets.QWizard.CancelButton).hide()
+        # self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next')
+        # self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish')
 
     # Stop key detection if the user presses the back button and reconnect the "NextButton" to the correct function call
@@ -196,6 +179,10 @@ class LatencyGUI(QtWidgets.QWizard):
         except TypeError:
             print('back button was pressed before UI was loaded completely. No need to worry')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
+
+    def on_page_six_next_button_pressed(self):
+        self.upload_measurement()
+        self.init_ui_page_seven()
 
     # Fills the combobox with all possible device types defined in the constants
     def init_combobox_device_type(self, auto_detected_value):
@@ -277,6 +264,18 @@ class LatencyGUI(QtWidgets.QWizard):
                 current_device.clear()
 
         self.extract_relevant_devices(devices)
+
+    # Create a plot of the latest measurement
+    def init_plot(self):
+        tips = sns.load_dataset("tips")
+        g = sns.FacetGrid(tips, col="sex", hue="time", palette="Set1",
+                          hue_order=["Dinner", "Lunch"])
+        g.map(plt.scatter, "total_bill", "tip", edgecolor="w")
+        return g.fig
+
+    # Upload the newly created .csv file of the latest measurement
+    def upload_measurement(self):
+        pass
 
     # Exract all USB devices connected to the computer and save the details of each device as an object
     def extract_relevant_devices(self, devices):
