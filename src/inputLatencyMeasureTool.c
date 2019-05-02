@@ -146,6 +146,9 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 		
 		debug("pin clear\n");
 
+        // maybe this helps to automatically start the measurement?
+        usleep(500000);
+
 		// make sure we aren't synced
 		usleep(delayList[i]);
 
@@ -172,6 +175,13 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 				break;
 			}
 
+            // if there is no event within one second, cancel
+            if(getCurTime_microseconds(CLOCK_REALTIME) - dStartTime > 1000000)
+            {
+                printf("cancelled");
+                return;
+            }
+
 			// maybe not ideal
 			usleep(10);
 		}
@@ -182,6 +192,7 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 		usleep(10);
 	}
 
+	printf("done");
 	digitalWrite(PIN_AUTO_MODE, LOW);
 }
 

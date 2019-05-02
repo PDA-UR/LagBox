@@ -20,6 +20,8 @@ extern FILE *g_pLogFile;
  */
 void logResults(struct latencies *l);
 
+void writeFileHeader(FILE *file, struct TestParams params);
+
 /*
  * Method:    Opens File in LAB_MODE folder
  *				Filename: pszFileName_day-month-year_hour-min-sec
