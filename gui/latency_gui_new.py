@@ -10,6 +10,7 @@ import evdev
 import os
 import time
 import csv
+from datetime import datetime
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton
 from PyQt5.QtGui import QIcon
@@ -50,6 +51,8 @@ class LatencyGUI(QtWidgets.QWizard):
     device_type = 2
     button_code = -1
     device_name = ''
+    vendor_id = ''
+    product_id = ''
 
     timer = None
 
@@ -76,11 +79,12 @@ class LatencyGUI(QtWidgets.QWizard):
     # User interface for page one (Page where general settings are placed)
     def init_ui_page_one(self):
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
-        self.init_combobox_device_type(None)
         self.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
         self.button(QtWidgets.QWizard.BackButton).hide()
         self.ui.button_refresh.clicked.connect(self.get_connected_devices)
         self.ui.comboBox_device.currentIndexChanged.connect(self.on_combobox_device_changed)
+
+        self.init_combobox_device_type(None)
         self.get_connected_devices()
 
     # User interface for page two (Page where the detection of the input button takes place)
@@ -105,7 +109,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_four)
-        self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
+        #self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
         self.button(QtWidgets.QWizard.BackButton).hide()
 
         timer_test = QTimer(self)
@@ -126,29 +130,56 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # User interface for page five (Page that askes the user if he wants to upload the measurements)
     def init_ui_page_five(self):
-        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Continue to Upload Results')
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_five)
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_six)
-        self.button(QtWidgets.QWizard.BackButton).hide()
+        print('Init Ui Page 5')
 
-        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish without uploading results')
+        self.setOption(QtWidgets.QWizard.HaveCustomButton1, True)
+        self.setOption(QtWidgets.QWizard.HaveCustomButton2, True)
+
+        self.ui.setButtonText(QtWidgets.QWizard.CustomButton1, 'Finish without uploading results')
+        self.ui.setButtonText(QtWidgets.QWizard.CustomButton2, 'Continue to Upload Results')
+
+        self.button(QtWidgets.QWizard.CustomButton1).clicked.connect(self.finish)
+        self.button(QtWidgets.QWizard.CustomButton2).clicked.connect(self.continue_to_upload_measurements)
+
+        self.button(QtWidgets.QWizard.BackButton).hide()
+        self.button(QtWidgets.QWizard.NextButton).hide()
+        self.button(QtWidgets.QWizard.CancelButton).hide()
+
+    def continue_to_upload_measurements(self):
+        self.init_ui_page_six()
+        self.next()
+
+    def finish(self):
+        self.done(0)
 
     # User interface for page six (Page where data about uploading the data is collected)
     def init_ui_page_six(self):
-        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Cancel Upload and Exit')
-        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Upload Results')
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_six)
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.on_page_six_next_button_pressed)
+        print('Init Ui Page 6')
+
+        self.ui.setButtonText(QtWidgets.QWizard.CustomButton1, 'Cancel Upload and Exit')
+        self.ui.setButtonText(QtWidgets.QWizard.CustomButton2, 'Upload Results')
+
+        self.button(QtWidgets.QWizard.CustomButton2).clicked.disconnect(self.continue_to_upload_measurements)
+        self.button(QtWidgets.QWizard.CustomButton2).clicked.connect(self.on_page_six_next_button_pressed)
+
         self.button(QtWidgets.QWizard.BackButton).hide()
+        self.button(QtWidgets.QWizard.NextButton).hide()
+        self.button(QtWidgets.QWizard.CancelButton).hide()
+
 
         # TODO: Prefill the author field and maybe even the email field with information saved in a .ini file
         self.ui.lineEdit_authors.setText(os.environ['USER'])
 
     # User interface for page seven (Page where The user is thanked for its participation)
     def init_ui_page_seven(self):
+        print('Init Ui Page 6')
+        self.button(QtWidgets.QWizard.CustomButton1).hide()
+        self.button(QtWidgets.QWizard.CustomButton2).hide()
+
         self.button(QtWidgets.QWizard.NextButton).hide()
         self.button(QtWidgets.QWizard.BackButton).hide()
         self.button(QtWidgets.QWizard.CancelButton).hide()
+
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish')
 
     # Stop key detection if the user presses the back button and reconnect the "NextButton" to the correct function call
@@ -193,6 +224,8 @@ class LatencyGUI(QtWidgets.QWizard):
             if device.name == self.ui.comboBox_device.currentText():
                 self.device_id = device.device_id.replace('Handlers=', '').replace("\\n'", '')
                 self.init_combobox_device_type(device.device_type)
+                self.vendor_id = device.vendor_id
+                self.product_id = device.product_id
 
                 break  # No need to continue after correct device is found
 
@@ -266,6 +299,36 @@ class LatencyGUI(QtWidgets.QWizard):
         print('Publish names', publish_names)
         print('Email', email)
         print('Notes', additional_notes)
+
+        # https://stackoverflow.com/questions/14471049/python-2-7-1-how-to-open-edit-and-close-a-csv-file
+
+        new_rows = []  # a holder for our modified rows when we make them
+        changes = {  # a dictionary of changes to make, find 'key' substitue with 'value'
+            '#author:;': '#author:;' + authors,
+            '#vendorId:;': '#vendorId:;' + self.vendor_id,
+            '#productId:;': '#productId:;' + self.product_id,
+            '#date:;': '#date:;' + datetime.today().strftime('%d-%m-%Y'),
+            '#bInterval:;': '#bInterval:;' + '????',  # TODO: Find out bInterval
+            '#deviceType:;': '#deviceType:;' + str(self.device_type),
+            '#email:;': '#email:;' + email,
+            '#public:;': '#public:;' + str(publish_names),
+            '#notes:;': '#notes:;' + additional_notes
+        }
+
+        filename = 'test.csv'
+
+        with open(filename, 'rb') as f:
+            reader = csv.reader(f)  # pass the file to our csv reader
+            for row in reader:  # iterate over the rows in the file
+                new_row = row  # at first, just copy the row
+                for key, value in changes.items():  # iterate over 'changes' dictionary
+                    new_row = [x.replace(key, value) for x in new_row]  # make the substitutions
+                new_rows.append(new_row)  # add the modified rows
+
+        with open(filename, 'wb') as f:
+            # Overwrite the old file with the modified rows
+            writer = csv.writer(f)
+            writer.writerows(new_rows)
 
         self.upload_measurement()
 
