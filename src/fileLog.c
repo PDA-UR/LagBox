@@ -47,6 +47,7 @@ void writeFileHeader(FILE *file, struct TestParams params)
     fprintf(file, "#deviceType:;\n");
     fprintf(file, "#email:;\n");
     fprintf(file, "#public:;\n");
+    fprintf(file, "#notes:;\n");
 }
 
 void replaceForbiddenChars(char *newString, char * pszFileName)

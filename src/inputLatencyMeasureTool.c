@@ -176,11 +176,11 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 			}
 
             // if there is no event within one second, cancel
-            if(getCurTime_microseconds(CLOCK_REALTIME) - dStartTime > 1000000)
-            {
-                printf("cancelled");
-                return;
-            }
+            //if(getCurTime_microseconds(CLOCK_REALTIME) - dStartTime > 1000000)
+            //{
+            //    printf("cancelled");
+            //    return;
+            //}
 
 			// maybe not ideal
 			usleep(10);
@@ -923,6 +923,8 @@ int main(int argc, char *argv[])
 			autoMode(resultData, g_testIterations);
 
 			logAutoModeData(params, resultData, g_testIterations);
+
+            printf(params.device);
 
 			free(resultData);
 			free(delayList);
