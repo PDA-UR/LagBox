@@ -33,20 +33,20 @@ void logResults(struct latencies *l)
 
 void writeFileHeader(FILE *file, struct TestParams params)
 {
-	fprintf(logFile, "#Device:;%s\n", filteredName);
-	fprintf(logFile, "#Button:;%d\n", params.buttonCode);
-	fprintf(logFile, "#minDelay:;%d\n", params.minDelay);
-	fprintf(logFile, "#maxDelay:;%d\n", params.maxDelay);
-	fprintf(logFile, "#iterations:;%d\n", params.iterations);
+	fprintf(file, "#Device:;%s\n", params.device);
+	fprintf(file, "#Button:;%d\n", params.buttonCode);
+	fprintf(file, "#minDelay:;%d\n", params.minDelay);
+	fprintf(file, "#maxDelay:;%d\n", params.maxDelay);
+	fprintf(file, "#iterations:;%d\n", params.iterations);
     
-    fprintf(logFile, "#author:;\n");
-    fprintf(logFile, "#vendorId:;\n");
-    fprintf(logFile, "#productId:;\n");
-    fprintf(logFile, "#date:;\n");
-    fprintf(logFile, "#bInterval:;\n");
-    fprintf(logFile, "#deviceType:;\n");
-    fprintf(logFile, "#email:;\n");
-    fprintf(logFile, "#public:;\n");
+    fprintf(file, "#author:;\n");
+    fprintf(file, "#vendorId:;\n");
+    fprintf(file, "#productId:;\n");
+    fprintf(file, "#date:;\n");
+    fprintf(file, "#bInterval:;\n");
+    fprintf(file, "#deviceType:;\n");
+    fprintf(file, "#email:;\n");
+    fprintf(file, "#public:;\n");
 }
 
 void replaceForbiddenChars(char *newString, char * pszFileName)
@@ -131,6 +131,7 @@ void logAutoModeData(struct TestParams params, struct AutoModeData *data, unsign
 	char filteredName[256];
 
 	replaceForbiddenChars(filteredName, params.device);
+    params.device = filteredName;
 
 	FILE *logFile = openLogFile(filteredName, STR_AUTOMODE);
 
