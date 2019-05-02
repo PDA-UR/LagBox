@@ -9,6 +9,7 @@ import struct
 import evdev
 import os
 import time
+import csv
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton
 from PyQt5.QtGui import QIcon
@@ -84,40 +85,29 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # User interface for page two (Page where the detection of the input button takes place)
     def init_ui_page_two(self):
-        print('Init UI page 2')
-
         self.validate_inputs()
 
         self.ui.button_restart_measurement.clicked.connect(self.listen_for_key_inputs)
-
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_two)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_three)
-
         self.ui.button(QtWidgets.QWizard.BackButton).clicked.connect(self.on_page_two_back_button_pressed)
         self.ui.label_selected_device.setText(self.ui.lineEdit_device_name.text())
         self.ui.label_selected_device_type.setText(str(self.ui.comboBox_device_type.currentText()))
-
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Start Measurement')
         # Disable the button until the keycode has been found out
         self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
-
         self.ui.button_restart_measurement.setEnabled(True)
+
         self.listen_for_key_inputs()
 
     # User interface for page three (Page where the LagBox measurement takes place)
     def init_ui_page_three(self):
-        print('Init UI page 3')
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
-
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_four)
         self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
-
         self.button(QtWidgets.QWizard.BackButton).hide()
-        # self.ui.button(QtWidgets.QWizard.BackButton).clicked.disconnect(self.on_page_two_back_button_pressed)
 
-        #self.ui.progressBar.setValue(0)
-        #self.ui.label_progress.setText('0/100')
         timer_test = QTimer(self)
         timer_test.setSingleShot(True)
         timer_test.timeout.connect(self.start_measurement)
@@ -125,31 +115,26 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # User interface for page four (Page that displays the results of the lagbox measurement)
     def init_ui_page_four(self):
-        print('Init UI page 4')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_four)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_five)
-        #self.ui.button(QtWidgets.QWizard.BackButton).setEnabled(False)
         self.button(QtWidgets.QWizard.BackButton).hide()
 
         # Path where the log will be saved
         self.ui.label_path_name.setText(os.path.dirname(os.path.realpath(__file__)).replace('gui', 'log'))
 
-        # self.init_plot()
+        self.init_plot()
 
     # User interface for page five (Page that askes the user if he wants to upload the measurements)
     def init_ui_page_five(self):
-        print('Init UI page 5')
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Continue to Upload Results')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_five)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_six)
         self.button(QtWidgets.QWizard.BackButton).hide()
 
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish without uploading results')
-        # self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.quit_application)
 
     # User interface for page six (Page where data about uploading the data is collected)
     def init_ui_page_six(self):
-        print('Init UI page 6')
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Cancel Upload and Exit')
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Upload Results')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_six)
@@ -161,12 +146,9 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # User interface for page seven (Page where The user is thanked for its participation)
     def init_ui_page_seven(self):
-        print('Init UI page 7')
         self.button(QtWidgets.QWizard.NextButton).hide()
         self.button(QtWidgets.QWizard.BackButton).hide()
         self.button(QtWidgets.QWizard.CancelButton).hide()
-        # self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next')
-        # self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish')
 
     # Stop key detection if the user presses the back button and reconnect the "NextButton" to the correct function call
@@ -183,7 +165,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
 
     def on_page_six_next_button_pressed(self):
-        self.upload_measurement()
+        self.save_additional_information_to_csv()
         self.init_ui_page_seven()
 
     # Fills the combobox with all possible device types defined in the constants
@@ -226,14 +208,10 @@ class LatencyGUI(QtWidgets.QWizard):
             self.timer.start(50)
 
     def validate_inputs(self):
-        #authors = self.ui.lineEdit_authors.text()
         self.device_name = self.ui.lineEdit_device_name.text()
-
         # TODO: Remove all non-allowed chars from device name and set a maximum length for the string
-
         self.device_type = Constants.DEVICE_TYPE_IDS[str(self.ui.comboBox_device_type.currentText()).replace(' (auto-detected)', '')]
 
-        #print("Authors: ", authors)
         print("Device name:", self.device_name)
         print("Device type ID:", self.device_type)
 
@@ -357,7 +335,6 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
     def start_measurement(self):
-        #command = 'ping google.com -c 10'
         command = '../bin/inputLatencyMeasureTool' + \
                   ' -m ' + str(Constants.MODE) + \
                   ' -b ' + str(self.button_code) + \
@@ -382,7 +359,7 @@ class LatencyGUI(QtWidgets.QWizard):
                 self.ui.label_progress.setText(str(line_id) + '/' + str(Constants.NUM_TEST_ITERATIONS))
                 self.ui.label_last_measured_time.setText(str(line).split(',')[2].replace("\\n'", '') + 'ms')
 
-            if len(line) is 0:
+            if len(line) is 0 or 'cancelled' in str(line):
                 break  # As soon as no more data is sent, stdout will only return empty lines
 
         print("Reached end of loop")
