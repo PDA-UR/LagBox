@@ -924,6 +924,8 @@ int main(int argc, char *argv[])
 
 			logAutoModeData(params, resultData, g_testIterations);
 
+            printf(params.device);
+
 			free(resultData);
 			free(delayList);
 
