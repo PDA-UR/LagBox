@@ -131,7 +131,8 @@ void logAutoModeData(struct TestParams params, struct AutoModeData *data, unsign
 	char filteredName[256];
 
 	replaceForbiddenChars(filteredName, params.device);
-    params.device = filteredName;
+
+    memcpy(params.device, filteredName, strlen(filteredName));
 
 	FILE *logFile = openLogFile(filteredName, STR_AUTOMODE);
 
