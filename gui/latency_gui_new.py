@@ -41,6 +41,7 @@ class Constants:
     MODE = 3  # (0 = stepper mode, 1 = stepper latency test mode, 2 = stepper reset mode, 3 = auto mode, 4 = pressure sensor test mode)
     NUM_TEST_ITERATIONS = 100
 
+
 class LatencyGUI(QtWidgets.QWizard):
 
     device_objects = []
@@ -68,7 +69,6 @@ class LatencyGUI(QtWidgets.QWizard):
 
         self.show()
         self.init_ui_page_one()
-
 
     # User interface for page one (Page where general settings are placed)
     def init_ui_page_one(self):
@@ -106,10 +106,10 @@ class LatencyGUI(QtWidgets.QWizard):
     def init_ui_page_three(self):
         print('Init UI page 3')
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
-        # TODO: Disable this button by default until measurement is finished
-        self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
+
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_four)
+        self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
 
         self.button(QtWidgets.QWizard.BackButton).hide()
         # self.ui.button(QtWidgets.QWizard.BackButton).clicked.disconnect(self.on_page_two_back_button_pressed)
@@ -368,6 +368,9 @@ class LatencyGUI(QtWidgets.QWizard):
                 break  # As soon as no more data is sent, stdout will only return empty lines
 
         print("Reached end of loop")
+
+        #TODO: Verify here if measurement was successful
+        self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
 
 
 # An object representation of all relevant data about connected USB device
