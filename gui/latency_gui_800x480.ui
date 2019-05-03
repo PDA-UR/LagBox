@@ -586,7 +586,7 @@ The next button you press will be used for the measurement.
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>120</y>
+      <y>80</y>
       <width>261</width>
       <height>31</height>
      </rect>
@@ -607,7 +607,7 @@ The next button you press will be used for the measurement.
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>120</y>
+      <y>80</y>
       <width>471</width>
       <height>31</height>
      </rect>
@@ -630,9 +630,9 @@ The next button you press will be used for the measurement.
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>220</y>
-      <width>760</width>
-      <height>200</height>
+      <y>190</y>
+      <width>750</width>
+      <height>220</height>
      </rect>
     </property>
     <property name="font">
@@ -645,6 +645,29 @@ The next button you press will be used for the measurement.
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_statistics">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>140</y>
+      <width>771</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>[Results]</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignHCenter|Qt::AlignTop</set>
     </property>
    </widget>
   </widget>
