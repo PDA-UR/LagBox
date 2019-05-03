@@ -309,7 +309,7 @@ to make it easier for others to find your device.</string>
     <property name="text">
      <string> LagBox is listening for a key input of the device specified above. 
 The next button you press will be used for the measurement. 
- Press the button until it's ID will be displayed above.</string>
+ Press the button until its ID will be displayed above.</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -529,7 +529,7 @@ The next button you press will be used for the measurement.
      </font>
     </property>
     <property name="text">
-     <string>0.000ms</string>
+     <string>0.0ms</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -585,20 +585,19 @@ The next button you press will be used for the measurement.
    <widget class="QLabel" name="label_measurement_finished">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>100</y>
-      <width>711</width>
-      <height>61</height>
+      <x>0</x>
+      <y>80</y>
+      <width>261</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>18</pointsize>
+      <pointsize>14</pointsize>
      </font>
     </property>
     <property name="text">
-     <string>Measurement finished successfully. 
-The results are saved under</string>
+     <string>The results are saved under</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -607,15 +606,15 @@ The results are saved under</string>
    <widget class="QLabel" name="label_path_name">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>170</y>
-      <width>711</width>
-      <height>41</height>
+      <x>290</x>
+      <y>80</y>
+      <width>471</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>18</pointsize>
+      <pointsize>14</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
@@ -630,10 +629,10 @@ The results are saved under</string>
    <widget class="QLabel" name="label_image">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>230</y>
-      <width>731</width>
-      <height>161</height>
+      <x>10</x>
+      <y>190</y>
+      <width>750</width>
+      <height>220</height>
      </rect>
     </property>
     <property name="font">
@@ -646,6 +645,29 @@ The results are saved under</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_statistics">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>140</y>
+      <width>771</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>[Results]</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignHCenter|Qt::AlignTop</set>
     </property>
    </widget>
   </widget>
