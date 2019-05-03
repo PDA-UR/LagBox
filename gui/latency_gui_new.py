@@ -4,7 +4,7 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QIcon, QPixmap
 
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, Qt
 import sys
 from subprocess import Popen, PIPE, STDOUT
 import struct
@@ -13,6 +13,7 @@ import os
 import time
 import csv
 from datetime import datetime
+#import DataPlotter
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton
 from PyQt5.QtGui import QIcon
@@ -44,7 +45,7 @@ class Constants:
 
     MODE = 3  # (0 = stepper mode, 1 = stepper latency test mode, 2 = stepper reset mode, 3 = auto mode, 4 = pressure sensor test mode)
     NUM_TEST_ITERATIONS = 100
-    NUM_DISPLAYED_DECIMAL_PLACES = 1
+    NUM_DISPLAYED_DECIMAL_PLACES = 1  # Number of decimal places displayed of the current measurement in ms
 
 
 class LatencyGUI(QtWidgets.QWizard):
@@ -62,6 +63,8 @@ class LatencyGUI(QtWidgets.QWizard):
     def __init__(self):
         super().__init__()
         self.init_ui()
+
+        # DataPlotter.DataPlotter.process_filedata(self, 'Test')
 
     def init_ui(self):
         self.ui = uic.loadUi(Constants.UI_FILE, self)
@@ -131,7 +134,10 @@ class LatencyGUI(QtWidgets.QWizard):
         # Path where the log will be saved
         self.ui.label_path_name.setText(os.path.dirname(os.path.realpath(__file__)).replace('gui', 'log'))
 
-        # self.ui.label_image.setPixmap(QPixmap('dinoGame.png'))
+        plot_name = '../log/AUTO_Logitech_USB-PS_2_Optical_Mouse_1ms_24.png'
+
+        image = QPixmap(plot_name).scaled(760, 190, Qt.KeepAspectRatio)
+        self.ui.label_image.setPixmap(image)
 
         #self.init_plot()
 
@@ -434,7 +440,7 @@ class LatencyGUI(QtWidgets.QWizard):
 
         print("Reached end of loop")
 
-        #TODO: Verify here if measurement was successful
+        # TODO: Verify here if measurement was successful
         self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
 
 
