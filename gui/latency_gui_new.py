@@ -403,6 +403,7 @@ class LatencyGUI(QtWidgets.QWizard):
     def start_measurement(self):
         command = '../bin/inputLatencyMeasureTool' + \
                   ' -m ' + str(Constants.MODE) + \
+                  ' -tmin 100 -tmax 10000' + \
                   ' -b ' + str(self.button_code) + \
                   ' -d ' + str(self.device_type) + \
                   ' -event ' + str(self.device_id).replace('event', '') + \
@@ -434,18 +435,19 @@ class LatencyGUI(QtWidgets.QWizard):
             elif '/log/' in str(line):
                 self.output_file_path = str(line).replace("b'", '').replace("\\n'", '')
             elif len(line) is 0:
-                break  # As soon as no more data is sent, stdout will only return empty lines
+                sys.exit('Found an empty line in stdout. This should not happen')
+                #break  # As soon as no more data is sent, stdout will only return empty lines
 
-        print("Reached end of loop")
+        self.create_data_plot()
 
-        print('A:', self.output_file_path)
-
-        self.dataplotter = DataPlotter.DataPlotter()
-        self.stats = self.dataplotter.process_filedata(self.output_file_path)
-        print(self.stats)
 
         # TODO: Verify here if measurement was successful
         self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
+
+    def create_data_plot(self):
+        self.dataplotter = DataPlotter.DataPlotter()
+        self.stats = self.dataplotter.process_filedata(self.output_file_path)
+        print(self.stats)
 
 
 # An object representation of all relevant data about connected USB device
