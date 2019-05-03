@@ -13,21 +13,10 @@ import os
 import time
 import csv
 from datetime import datetime
-#import DataPlotter
+import DataPlotter
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton
 from PyQt5.QtGui import QIcon
-
-try:
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-    from matplotlib.figure import Figure
-    from matplotlib import pyplot as plt
-    import seaborn as sns
-except:
-    print('Matplotlib or Seaborn not installed')
-
-
-import random
 
 
 class Constants:
@@ -58,28 +47,20 @@ class LatencyGUI(QtWidgets.QWizard):
     vendor_id = ''
     product_id = ''
 
+    stats = ''
+
     timer = None
 
     def __init__(self):
         super().__init__()
         self.init_ui()
 
-        # DataPlotter.DataPlotter.process_filedata(self, 'Test')
-
     def init_ui(self):
         self.ui = uic.loadUi(Constants.UI_FILE, self)
         self.setWindowTitle(Constants.WINDOW_TITLE)
-
-        #self.layout = QVBoxLayout()
-        #self.canvas = FigureCanvas(self.init_plot())
-        #self.canvas.setParent(self)
-        #self.canvas.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        #self.canvas.updateGeometry()
-        # self.canvas.draw()
-        #self.layout.addWidget(self.canvas)
-
         self.showFullScreen()
         self.show()
+
         self.init_ui_page_one()
 
     # User interface for page one (Page where general settings are placed)
@@ -134,9 +115,11 @@ class LatencyGUI(QtWidgets.QWizard):
         # Path where the log will be saved
         self.ui.label_path_name.setText(os.path.dirname(os.path.realpath(__file__)).replace('gui', 'log'))
 
+        self.ui.label_statistics.setText(self.stats)
+
         plot_name = '../log/AUTO_Logitech_USB-PS_2_Optical_Mouse_1ms_24.png'
 
-        image = QPixmap(plot_name).scaled(760, 190, Qt.KeepAspectRatio)
+        image = QPixmap(plot_name).scaledToHeight(190)
         self.ui.label_image.setPixmap(image)
 
         #self.init_plot()
@@ -284,15 +267,6 @@ class LatencyGUI(QtWidgets.QWizard):
         print('Values for bInterval of device:')
         print(lines)
 
-    # Create a plot of the latest measurement
-    def init_plot(self):
-        return
-        tips = sns.load_dataset("tips")
-        g = sns.FacetGrid(tips, col="sex", hue="time", palette="Set1",
-                          hue_order=["Dinner", "Lunch"])
-        g.map(plt.scatter, "total_bill", "tip", edgecolor="w")
-        return g.fig
-
     def save_additional_information_to_csv(self):
         print('Saving additional information to CSV')
 
@@ -439,6 +413,9 @@ class LatencyGUI(QtWidgets.QWizard):
                 break  # As soon as no more data is sent, stdout will only return empty lines
 
         print("Reached end of loop")
+        self.dataplotter = DataPlotter.DataPlotter()
+        self.stats = self.dataplotter.process_filedata('Test')
+        print(self.stats)
 
         # TODO: Verify here if measurement was successful
         self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
