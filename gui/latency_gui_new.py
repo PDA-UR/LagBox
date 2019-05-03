@@ -22,14 +22,15 @@ from PyQt5.QtGui import QIcon
 
 
 class Constants:
-    #UI_FILE = 'latency_gui.ui'
     UI_FILE = 'latency_gui_800x480.ui'
     DEVICE_TYPES = ['Gamepad', 'Mouse', 'Keyboard']
     DEVICE_TYPE_IDS = {'Gamepad': 1, 'Mouse': 2, 'Keyboard': 3}
     WINDOW_TITLE = 'LagBox'
     BUTTON_NEXT_DEFAULT_NAME = 'Next >'
 
-    MODE = 3  # (0 = stepper mode, 1 = stepper latency test mode, 2 = stepper reset mode, 3 = auto mode, 4 = pressure sensor test mode)
+    MODE = 3
+    # (0 = stepper mode, 1 = stepper latency test mode, 2 = stepper reset mode,
+    # 3 = auto mode, 4 = pressure sensor test mode)
     NUM_TEST_ITERATIONS = 100
     NUM_DISPLAYED_DECIMAL_PLACES = 1  # Number of decimal places displayed of the current measurement in ms
 
@@ -98,7 +99,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_four)
-        #self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
+        # self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
         self.button(QtWidgets.QWizard.BackButton).hide()
 
         timer_test = QTimer(self)
@@ -270,6 +271,7 @@ class LatencyGUI(QtWidgets.QWizard):
         print(lines)
 
         # TODO: Find correct bInterval value if there are multiple
+        return lines[0]
 
     # if a user chooses to share and upload his/her measurement results, additional data like the users name and
     # email-adress will be saved to the csv file
@@ -296,7 +298,7 @@ class LatencyGUI(QtWidgets.QWizard):
             '#vendorId:;': '#vendorId:;' + self.vendor_id,
             '#productId:;': '#productId:;' + self.product_id,
             '#date:;': '#date:;' + datetime.today().strftime('%d-%m-%Y'),
-            '#bInterval:;': '#bInterval:;' + '????',  # TODO: Find out bInterval
+            '#bInterval:;': '#bInterval:;' + str(self.get_device_bInterval()),
             '#deviceType:;': '#deviceType:;' + str(self.device_type),
             '#email:;': '#email:;' + email,
             '#public:;': '#public:;' + str(publish_names),
@@ -330,7 +332,7 @@ class LatencyGUI(QtWidgets.QWizard):
                                                       'id': 'projects:latency:upload'})
         print(r.status_code, r.reason)
 
-    # Exract all USB devices connected to the computer and save the details of each device as an object
+    # Extract all USB devices connected to the computer and save the details of each device as an object
     def extract_relevant_devices(self, devices):
         device_names = []
         for device in devices:
@@ -421,7 +423,6 @@ class LatencyGUI(QtWidgets.QWizard):
                 print('Finished successful')
                 break
             elif 'cancelled' in str(line):
-                print('Cancelled!')
                 sys.exit('Measurement failed')
             elif '/log/' in str(line):
                 self.output_file_path = str(line).replace("b'", '').replace("\\n'", '')
