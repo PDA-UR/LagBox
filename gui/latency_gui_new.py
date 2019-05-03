@@ -33,7 +33,7 @@ class Constants:
     NUM_TEST_ITERATIONS = 100
     NUM_DISPLAYED_DECIMAL_PLACES = 1  # Number of decimal places displayed of the current measurement in ms
 
-    SERVER_URL =''  # URL to the server where .csv files of measurement data should get uploaded
+    SERVER_URL = 'https://hci.ur.de/projects/latency/upload'  # URL to the server where .csv files of measurement data should get uploaded
 
 
 class LatencyGUI(QtWidgets.QWizard):
@@ -321,7 +321,13 @@ class LatencyGUI(QtWidgets.QWizard):
     # Upload the newly created .csv file of the latest measurement
     def upload_measurement(self):
         return
-        r = requests.post(Constants.SERVER_URL, data={self.output_file_path: f})
+        r = requests.post(Constants.SERVER_URL, data={'bureaucracy[0]': self.output_file_path,
+                                                      'bureaucracy[1]': 'NAME',
+                                                      'bureaucracy[2]': EMAIL,
+                                                      'bureaucracy[3]': '1 (entspricht True hier)',
+                                                      'bureaucracy[4]': 'Comments',
+                                                      'bureaucracy[$$id]': '1',
+                                                      'id': 'projects:latency:upload'})
         print(r.status_code, r.reason)
 
     # Exract all USB devices connected to the computer and save the details of each device as an object
