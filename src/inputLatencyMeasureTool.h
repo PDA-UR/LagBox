@@ -54,20 +54,6 @@ struct AutoModeData
 	int delayTime;
 };
 
-struct StepperModeResult
-{
-	int stepsMoved;
-	long long startTime;
-	long long endTime;
-	long long usbTime;
-};
-
-struct PressureData
-{
-	long long timestamp;
-	unsigned int pressure;
-};
-
 struct TestParams
 {
 	int mode;
@@ -76,7 +62,6 @@ struct TestParams
     int iterations;
     int buttonCode;
     char device[256];
-    int steps;
     int waitTime;
 };
 
@@ -126,10 +111,6 @@ double timevalToSeconds(struct timeval *tv);
 
 long long timevalToMicroSeconds(struct timeval *tv);
 
-void setupSPI(int spiChannel);
-
-int readADC(int channelConfig, int analogChannel);
-
 void autoMode(struct AutoModeData *results, unsigned int iterations);
 
 int checkButtonState(long long* timestamp);
@@ -144,25 +125,13 @@ void testPin(int pin);
 
 void setupPins();
 
-void testStepper();
-
 void swap(int list[], int a, int b);
 
 void fisherYatesShuffle(int length, int list[length]);
 
 void createDelayList(int min, int max, int length);
 
-void calibrateStepper();
-
-void measureStepperLatency(int steps, int iterations, int waitTime, long long* result);
-
 int clearInputEvents();
-
-void stepperMode(int iterations, int waitTime, struct StepperModeResult* result);
-
-pthread_t startPressureMeasurement(struct PressureData* pressureData);
-
-void* pressureSensorThread(void* args);
 
 void debug(const char* format, ...);
 
