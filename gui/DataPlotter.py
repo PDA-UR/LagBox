@@ -3,8 +3,12 @@
 
 import sys
 import numpy as np
-from matplotlib import pyplot as plt
-import seaborn as sns
+
+try:
+    from matplotlib import pyplot as plt
+    import seaborn as sns
+except ImportError:
+    sys.exit('Please install Matplotlib and Seaborn')
 
 
 # All Constants are placed in their own class to find them more easily
@@ -12,10 +16,10 @@ class Constants:
     CSV_DELIMITER = ';'
     PLOT_X_MIN = 0  # Minimum x value of the plot
     PLOT_X_MAX = 100  # Maximum x value of the plot
-    PLOT_WIDTH = 8
+    PLOT_WIDTH = 9
     PLOT_HEIGHT = 2
     PLOT_OUTPUT_DPI = 300
-    PLOT_FONTSIZE = 18
+    PLOT_FONTSIZE = 12
 
 
 class Result:
@@ -43,7 +47,7 @@ class DataPlotter:
     result = Result()
 
     def __init__(self, filename=None):
-        #pass
+        # pass
         self.process_filedata(filename)
 
     # Reads in a csv file and hands the data over at the end
@@ -74,8 +78,10 @@ class DataPlotter:
         latencies = self.parse_measurements(measurement_rows)
 
         self.parse_comments(comment_lines)
-        self.get_stats_about_data(latencies)
+        stats = self.get_stats_about_data(latencies)
         self.generate_plot(filename, latencies)
+
+        return stats
 
     # Parse the bare rows from the .csv file and extract only the relevant data
     def parse_measurements(self, measurement_rows):
@@ -127,8 +133,11 @@ class DataPlotter:
         self.result.max = maximum
         self.result.standardDeviation = standard_deviation
 
-        print("Mean: ", mean, "Median: ", median, "Minimum: ", minimum, "Maximum", maximum, "Standard Deviation: ",
-              standard_deviation)
+        return ('Mean: ' + str(round(mean, 3)) +
+                ' Median: ' + str(round(median, 3)) +
+                ' Minimum: ' + str(round(minimum, 3)) +
+                '\nMaximum: ' + str(round(maximum, 3)) +
+                ' Standard Deviation: ' + str(round(standard_deviation, 3)))
 
     # Get a name for the plot that will be saved as an image at the end
     def get_image_filename(self, filename):
@@ -149,7 +158,7 @@ class DataPlotter:
 
         # plt.title("TEST")
         plt.xlabel("latency (ms)")
-        #plt.xlim(Constants.PLOT_X_MIN, Constants.PLOT_X_MAX)
+        # plt.xlim(Constants.PLOT_X_MIN, Constants.PLOT_X_MAX)
 
         axes = plt.gca()
 
