@@ -60,8 +60,8 @@ class DataPlotter:
                 measurement_rows = current_file[i + 1:len(current_file)]
                 break  # No need to continue the loop
 
-        print(comment_lines)
-        print(measurement_rows)
+        # print(comment_lines)
+        # print(measurement_rows)
 
         # The csv file is now read in and relevant parts are extracted. Now the data needs to be processed further
         latencies = self.parse_measurements(measurement_rows)
@@ -146,12 +146,13 @@ class DataPlotter:
         # ax = sns.swarmplot((values["latency"]), values["polling"], hue=None, palette="colorblind", size=1, dodge=True,
         # marker="H",orient="h", alpha=1, zorder=0)
 
-        ax = sns.swarmplot(x=latencies, hue=None, palette="colorblind", dodge=True, marker="H", orient="h", alpha=1,
+        ax = sns.swarmplot(x=latencies, hue=None, palette="colorblind", marker="H", orient="h", alpha=1,
                            zorder=0)
 
         # plt.title("TEST")
         plt.xlabel("latency (ms)")
-        # plt.xlim(Constants.PLOT_X_MIN, Constants.PLOT_X_MAX)
+        plt.xlim(Constants.PLOT_X_MIN, Constants.PLOT_X_MAX)
+        # plt.xlim(left=0)
 
         axes = plt.gca()
 
