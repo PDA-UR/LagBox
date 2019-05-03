@@ -17,7 +17,7 @@ int getPollingRate()
    	
    	fclose(cmdlinetxt);
 
-   	printf("mousepoll: %d\n", pollingRate);
+   	//printf("mousepoll: %d\n", pollingRate);
    	
    	return(pollingRate);
 }
@@ -181,6 +181,8 @@ FILE *openLogFile(char *pszFileName, char *mode)
 		logfileNumber++;
 		sprintf(path, "../log/%s_%s_%dms_%d.csv", mode, filteredName, pollingRate, logfileNumber);
 	}
+
+    printf("%s\n", path);
 
 	logFile = fopen(path, "w+");
 	if (logFile == NULL)

@@ -147,7 +147,7 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 		debug("pin clear\n");
 
         // maybe this helps to automatically start the measurement?
-        usleep(500000);
+        //usleep(500000);
 
 		// make sure we aren't synced
 		usleep(delayList[i]);
@@ -192,7 +192,6 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 		usleep(10);
 	}
 
-	printf("done");
 	digitalWrite(PIN_AUTO_MODE, LOW);
 }
 
@@ -924,7 +923,8 @@ int main(int argc, char *argv[])
 
 			logAutoModeData(params, resultData, g_testIterations);
 
-            printf(params.device);
+            printf("%s\n", params.device);
+            printf("done\n");
 
 			free(resultData);
 			free(delayList);
