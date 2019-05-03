@@ -4,13 +4,6 @@
 import sys
 import numpy as np
 
-try:
-    from matplotlib import pyplot as plt
-    import seaborn as sns
-except ImportError:
-    sys.exit('Please install Matplotlib and Seaborn')
-
-
 # All Constants are placed in their own class to find them more easily
 class Constants:
     CSV_DELIMITER = ';'
@@ -53,12 +46,12 @@ class DataPlotter:
     # Reads in a csv file and hands the data over at the end
     def process_filedata(self, filename):
 
-        filename = 'AUTO_Logitech_USB-PS_2_Optical_Mouse_1ms_24.csv'
+        file_path = '../log/' + filename
 
         try:
-            current_file = open(filename, 'r').readlines()  # Open the csv File
+            current_file = open(file_path, 'r').readlines()  # Open the csv File
         except:
-            sys.exit("file missing: " + filename)
+            sys.exit("file missing: " + file_path)
 
         comment_lines = []  # All lines containing a comment (==> Metadata about the measurement)
         measurement_rows = []  # All lines containing actual measurement data
@@ -139,12 +132,16 @@ class DataPlotter:
                 '\nMaximum: ' + str(round(maximum, 3)) +
                 ' Standard Deviation: ' + str(round(standard_deviation, 3)))
 
-    # Get a name for the plot that will be saved as an image at the end
-    def get_image_filename(self, filename):
-        return filename.replace('.csv', '.png')
-
     # Generate a plot from the extracted latencies
-    def generate_plot(self, filename, latencies):
+    def generate_plot(self, file_path, latencies):
+        try:
+            print('Importing modules')
+            from matplotlib import pyplot as plt
+            import seaborn as sns
+        except ImportError:
+            print('Pyplot and/or Seaborn not installed')
+            return
+
         plt.rcParams.update({'font.size': Constants.PLOT_FONTSIZE})
         plt.figure(figsize=[Constants.PLOT_WIDTH, Constants.PLOT_HEIGHT])
 
@@ -162,7 +159,7 @@ class DataPlotter:
 
         axes = plt.gca()
 
-        plt.savefig(self.get_image_filename(filename), dpi=Constants.PLOT_OUTPUT_DPI, bbox_inches="tight")
+        plt.savefig(file_path.replace('.csv', '.png'), dpi=Constants.PLOT_OUTPUT_DPI, bbox_inches="tight")
         print("Plot created successfully")
 
 
