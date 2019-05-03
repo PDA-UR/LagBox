@@ -39,14 +39,10 @@ class DataPlotter:
 
     result = Result()
 
-    def __init__(self, filename=None):
-        # pass
-        self.process_filedata(filename)
-
     # Reads in a csv file and hands the data over at the end
-    def process_filedata(self, filename):
+    def process_filedata(self, file_path):
 
-        file_path = '../log/' + filename
+        print(file_path)
 
         try:
             current_file = open(file_path, 'r').readlines()  # Open the csv File
@@ -72,7 +68,7 @@ class DataPlotter:
 
         self.parse_comments(comment_lines)
         stats = self.get_stats_about_data(latencies)
-        self.generate_plot(filename, latencies)
+        self.generate_plot(file_path, latencies)
 
         return stats
 
