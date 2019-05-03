@@ -99,7 +99,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_four)
-        # self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
+        self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
         self.button(QtWidgets.QWizard.BackButton).hide()
 
         timer_test = QTimer(self)
@@ -135,19 +135,26 @@ class LatencyGUI(QtWidgets.QWizard):
 
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish without uploading results')
 
-    # User interface for page six (Page where data about uploading the data is collected)
     def init_ui_page_six(self):
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Accept')
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_six)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_seven)
+        self.button(QtWidgets.QWizard.BackButton).hide()
+        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish without uploading results')
+
+    # User interface for page seven (Page where data about uploading the data is collected)
+    def init_ui_page_seven(self):
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Cancel Upload and Exit')
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Upload Results')
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_six)
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.on_page_six_next_button_pressed)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_seven)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.on_page_seven_next_button_pressed)
         self.button(QtWidgets.QWizard.BackButton).hide()
 
         # TODO: Prefill the author field and maybe even the email field with information saved in a .ini file
         self.ui.lineEdit_authors.setText(os.environ['USER'])
 
-    # User interface for page seven (Page where The user is thanked for its participation)
-    def init_ui_page_seven(self):
+    # User interface for page eight (Page where The user is thanked for its participation)
+    def init_ui_page_eight(self):
         self.button(QtWidgets.QWizard.NextButton).hide()
         self.button(QtWidgets.QWizard.BackButton).hide()
         self.button(QtWidgets.QWizard.CancelButton).hide()
@@ -166,9 +173,9 @@ class LatencyGUI(QtWidgets.QWizard):
             print('back button was pressed before UI was loaded completely. No need to worry')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
 
-    def on_page_six_next_button_pressed(self):
+    def on_page_seven_next_button_pressed(self):
         self.save_additional_information_to_csv()
-        self.init_ui_page_seven()
+        self.init_ui_page_eight()
 
     # Fills the combobox with all possible device types defined in the constants
     def init_combobox_device_type(self, auto_detected_value):
