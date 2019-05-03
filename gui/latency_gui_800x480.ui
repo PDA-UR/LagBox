@@ -529,7 +529,7 @@ The next button you press will be used for the measurement.
      </font>
     </property>
     <property name="text">
-     <string>0.000ms</string>
+     <string>0.0ms</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
