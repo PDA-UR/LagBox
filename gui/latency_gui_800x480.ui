@@ -585,7 +585,7 @@ The next button you press will be used for the measurement.
    <widget class="QLabel" name="label_measurement_finished">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>20</x>
       <y>80</y>
       <width>261</width>
       <height>31</height>
@@ -597,7 +597,7 @@ The next button you press will be used for the measurement.
      </font>
     </property>
     <property name="text">
-     <string>The results are saved under</string>
+     <string>The results are saved under:</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -606,9 +606,9 @@ The next button you press will be used for the measurement.
    <widget class="QLabel" name="label_path_name">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>300</x>
       <y>80</y>
-      <width>471</width>
+      <width>461</width>
       <height>31</height>
      </rect>
     </property>
@@ -623,7 +623,7 @@ The next button you press will be used for the measurement.
      <string>[PATH NAME]</string>
     </property>
     <property name="alignment">
-     <set>Qt::AlignCenter</set>
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
     </property>
    </widget>
    <widget class="QLabel" name="label_image">
@@ -641,7 +641,7 @@ The next button you press will be used for the measurement.
      </font>
     </property>
     <property name="text">
-     <string>[PLACEHOLDER FOR PLOT]</string>
+     <string>[COULD NOT DISPLAY PLOT]</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
