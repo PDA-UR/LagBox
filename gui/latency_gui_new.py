@@ -13,6 +13,8 @@ import os
 import time
 import csv
 from datetime import datetime
+import requests
+
 import DataPlotter
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton
@@ -25,16 +27,13 @@ class Constants:
     DEVICE_TYPES = ['Gamepad', 'Mouse', 'Keyboard']
     DEVICE_TYPE_IDS = {'Gamepad': 1, 'Mouse': 2, 'Keyboard': 3}
     WINDOW_TITLE = 'LagBox'
-
-    PLOT_X_MIN = 0  # Minimum x value of the plot
-    PLOT_X_MAX = 100  # Maximum x value of the plot
-    PLOT_WIDTH = 16
-    PLOT_HEIGHT = 4
-    PLOT_FONTSIZE = 18
+    BUTTON_NEXT_DEFAULT_NAME = 'Next >'
 
     MODE = 3  # (0 = stepper mode, 1 = stepper latency test mode, 2 = stepper reset mode, 3 = auto mode, 4 = pressure sensor test mode)
     NUM_TEST_ITERATIONS = 100
     NUM_DISPLAYED_DECIMAL_PLACES = 1  # Number of decimal places displayed of the current measurement in ms
+
+    SERVER_URL =''  # URL to the server where .csv files of measurement data should get uploaded
 
 
 class LatencyGUI(QtWidgets.QWizard):
@@ -47,6 +46,7 @@ class LatencyGUI(QtWidgets.QWizard):
     vendor_id = ''
     product_id = ''
 
+    output_file_path = ''  # Filepath and name of the created .csv file
     stats = ''
 
     timer = None
@@ -66,7 +66,7 @@ class LatencyGUI(QtWidgets.QWizard):
     # User interface for page one (Page where general settings are placed)
     def init_ui_page_one(self):
 
-        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
         self.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
         self.button(QtWidgets.QWizard.BackButton).hide()
         self.ui.button_refresh.clicked.connect(self.get_connected_devices)
@@ -95,7 +95,7 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # User interface for page three (Page where the LagBox measurement takes place)
     def init_ui_page_three(self):
-        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_four)
         #self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
@@ -117,12 +117,11 @@ class LatencyGUI(QtWidgets.QWizard):
 
         self.ui.label_statistics.setText(self.stats)
 
-        plot_name = '../log/AUTO_Logitech_USB-PS_2_Optical_Mouse_1ms_24.png'
-
-        image = QPixmap(plot_name).scaledToHeight(190)
-        self.ui.label_image.setPixmap(image)
-
-        #self.init_plot()
+        try:
+            image = QPixmap(self.output_file_path.replace('.csv', '.png')).scaledToHeight(190)
+            self.ui.label_image.setPixmap(image)
+        except:
+            print('PLOT IMAGE NOT AVAILABLE!')
 
     # User interface for page five (Page that askes the user if he wants to upload the measurements)
     def init_ui_page_five(self):
@@ -146,8 +145,7 @@ class LatencyGUI(QtWidgets.QWizard):
         # TODO: Prefill the author field and maybe even the email field with information saved in a .ini file
         self.ui.lineEdit_authors.setText(os.environ['USER'])
 
-        # User interface for page seven (Page where The user is thanked for its participation)
-
+    # User interface for page seven (Page where The user is thanked for its participation)
     def init_ui_page_seven(self):
         self.button(QtWidgets.QWizard.NextButton).hide()
         self.button(QtWidgets.QWizard.BackButton).hide()
@@ -182,11 +180,13 @@ class LatencyGUI(QtWidgets.QWizard):
         else:
             self.ui.comboBox_device_type.addItems(Constants.DEVICE_TYPES)
 
+    # Initialize the combobox with a list of deviced handed over
     def init_combobox_device(self, devices):
         self.ui.comboBox_device.clear()
         self.ui.comboBox_device.addItems(devices)
         self.ui.comboBox_device_type.setCurrentIndex(0)
 
+    # If the user selects a different device in the combobox, all variables will get updated with new data
     def on_combobox_device_changed(self):
         # Copy the name of the device into the text field to allow the user to change the displayed name
         self.ui.lineEdit_device_name.setText(str(self.ui.comboBox_device.currentText()))
@@ -201,6 +201,7 @@ class LatencyGUI(QtWidgets.QWizard):
 
                 break  # No need to continue after correct device is found
 
+    # Detect the button a user pressed in order to get the ID of that button
     def listen_for_key_inputs(self):
         if self.ui.button_restart_measurement.isEnabled():
             self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
@@ -220,6 +221,8 @@ class LatencyGUI(QtWidgets.QWizard):
         print("Device name:", self.device_name)
         print("Device type ID:", self.device_type)
 
+
+    # Get a list of all connected devices of the computer
     def get_connected_devices(self):
         lines = []
 
@@ -255,7 +258,6 @@ class LatencyGUI(QtWidgets.QWizard):
         print('Searching bInterval of device')
         lines = []
 
-        # vendor_device_id = '03f0:094a'
         command = 'lsusb -vd ' + self.vendor_id + ':' + self.product_id + ' | grep bInterval'
         process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
         for line in iter(process.stdout.readline, ''):
@@ -267,54 +269,60 @@ class LatencyGUI(QtWidgets.QWizard):
         print('Values for bInterval of device:')
         print(lines)
 
+        # TODO: Find correct bInterval value if there are multiple
+
+    # if a user chooses to share and upload his/her measurement results, additional data like the users name and
+    # email-adress will be saved to the csv file
     def save_additional_information_to_csv(self):
         print('Saving additional information to CSV')
+        print('Path of csv file:', self.output_file_path)
 
-        # authors = self.ui.lineEdit_authors.text()
-        # publish_names = self.ui.checkBox_allow_name_publishing.isChecked()
-        # email = self.ui.lineEdit_email.text()
-        # additional_notes = self.ui.plainTextEdit_additional_notes.toPlainText()
-        #
-        # print("Authors: ", authors)
-        # print('Publish names', publish_names)
-        # print('Email', email)
-        # print('Notes', additional_notes)
-        #
-        # # https://stackoverflow.com/questions/14471049/python-2-7-1-how-to-open-edit-and-close-a-csv-file
-        #
-        # new_rows = []  # a holder for our modified rows when we make them
-        # changes = {  # a dictionary of changes to make, find 'key' substitue with 'value'
-        #     '#author:;': '#author:;' + authors,
-        #     '#vendorId:;': '#vendorId:;' + self.vendor_id,
-        #     '#productId:;': '#productId:;' + self.product_id,
-        #     '#date:;': '#date:;' + datetime.today().strftime('%d-%m-%Y'),
-        #     '#bInterval:;': '#bInterval:;' + '????',  # TODO: Find out bInterval
-        #     '#deviceType:;': '#deviceType:;' + str(self.device_type),
-        #     '#email:;': '#email:;' + email,
-        #     '#public:;': '#public:;' + str(publish_names),
-        #     '#notes:;': '#notes:;' + additional_notes
-        # }
-        #
-        # filename = 'test.csv'
-        #
-        # with open(filename, 'rb') as f:
-        #     reader = csv.reader(f)  # pass the file to our csv reader
-        #     for row in reader:  # iterate over the rows in the file
-        #         new_row = row  # at first, just copy the row
-        #         for key, value in changes.items():  # iterate over 'changes' dictionary
-        #             new_row = [x.replace(key, value) for x in new_row]  # make the substitutions
-        #         new_rows.append(new_row)  # add the modified rows
-        #
-        # with open(filename, 'wb') as f:
-        #     # Overwrite the old file with the modified rows
-        #     writer = csv.writer(f)
-        #     writer.writerows(new_rows)
-        #
-        # self.upload_measurement()
+        authors = self.ui.lineEdit_authors.text()
+        publish_names = self.ui.checkBox_allow_name_publishing.isChecked()
+        email = self.ui.lineEdit_email.text()
+        additional_notes = self.ui.plainTextEdit_additional_notes.toPlainText()
+
+        print("Authors: ", authors)
+        print('Publish names', publish_names)
+        print('Email', email)
+        print('Notes', additional_notes)
+
+        # Update data in existing csv file:
+        # https://stackoverflow.com/questions/14471049/python-2-7-1-how-to-open-edit-and-close-a-csv-file
+
+        new_rows = []  # a holder for our modified rows when we make them
+        changes = {  # a dictionary of changes to make, find 'key' substitue with 'value'
+            '#author:;': '#author:;' + authors,
+            '#vendorId:;': '#vendorId:;' + self.vendor_id,
+            '#productId:;': '#productId:;' + self.product_id,
+            '#date:;': '#date:;' + datetime.today().strftime('%d-%m-%Y'),
+            '#bInterval:;': '#bInterval:;' + '????',  # TODO: Find out bInterval
+            '#deviceType:;': '#deviceType:;' + str(self.device_type),
+            '#email:;': '#email:;' + email,
+            '#public:;': '#public:;' + str(publish_names),
+            '#notes:;': '#notes:;' + additional_notes
+        }
+
+        with open(self.output_file_path, 'rb') as f:
+            reader = csv.reader(f)  # pass the file to our csv reader
+            for row in reader:  # iterate over the rows in the file
+                new_row = row  # at first, just copy the row
+                for key, value in changes.items():  # iterate over 'changes' dictionary
+                    new_row = [x.replace(key, value) for x in new_row]  # make the substitutions
+                new_rows.append(new_row)  # add the modified rows
+
+        with open(self.output_file_path, 'wb') as f:
+            # Overwrite the old file with the modified rows
+            writer = csv.writer(f)
+            writer.writerows(new_rows)
+
+        self.upload_measurement()
 
     # Upload the newly created .csv file of the latest measurement
     def upload_measurement(self):
-        pass
+        return
+        r = requests.post(Constants.SERVER_URL, data={self.output_file_path: f})
+        print(r.status_code, r.reason)
 
     # Exract all USB devices connected to the computer and save the details of each device as an object
     def extract_relevant_devices(self, devices):
@@ -409,12 +417,17 @@ class LatencyGUI(QtWidgets.QWizard):
             elif 'cancelled' in str(line):
                 print('Cancelled!')
                 sys.exit('Measurement failed')
+            elif '/log/' in str(line):
+                self.output_file_path = str(line).replace("b'", '').replace("\\n'", '')
             elif len(line) is 0:
                 break  # As soon as no more data is sent, stdout will only return empty lines
 
         print("Reached end of loop")
+
+        print('A:', self.output_file_path)
+
         self.dataplotter = DataPlotter.DataPlotter()
-        self.stats = self.dataplotter.process_filedata('Test')
+        self.stats = self.dataplotter.process_filedata(self.output_file_path)
         print(self.stats)
 
         # TODO: Verify here if measurement was successful
