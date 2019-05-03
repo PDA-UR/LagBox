@@ -44,6 +44,7 @@ class Constants:
 
     MODE = 3  # (0 = stepper mode, 1 = stepper latency test mode, 2 = stepper reset mode, 3 = auto mode, 4 = pressure sensor test mode)
     NUM_TEST_ITERATIONS = 100
+    NUM_DISPLAYED_DECIMAL_PLACES = 1
 
 
 class LatencyGUI(QtWidgets.QWizard):
@@ -93,6 +94,7 @@ class LatencyGUI(QtWidgets.QWizard):
     # User interface for page two (Page where the detection of the input button takes place)
     def init_ui_page_two(self):
         self.validate_inputs()
+        self.get_device_bInterval()
 
         self.ui.button_restart_measurement.clicked.connect(self.listen_for_key_inputs)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_two)
@@ -131,7 +133,7 @@ class LatencyGUI(QtWidgets.QWizard):
 
         # self.ui.label_image.setPixmap(QPixmap('dinoGame.png'))
 
-        self.init_plot()
+        #self.init_plot()
 
     # User interface for page five (Page that askes the user if he wants to upload the measurements)
     def init_ui_page_five(self):
@@ -259,6 +261,23 @@ class LatencyGUI(QtWidgets.QWizard):
 
         self.extract_relevant_devices(devices)
 
+    # Extract the bInterval of the device
+    def get_device_bInterval(self):
+        print('Searching bInterval of device')
+        lines = []
+
+        # vendor_device_id = '03f0:094a'
+        command = 'lsusb -vd ' + self.vendor_id + ':' + self.product_id + ' | grep bInterval'
+        process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+        for line in iter(process.stdout.readline, ''):
+            if len(line) is 0:
+                break
+            else:
+                if 'bInterval' in str(line):
+                    lines.append(line.decode("utf-8").replace('\n', '').replace('bInterval', '').strip())
+        print('Values for bInterval of device:')
+        print(lines)
+
     # Create a plot of the latest measurement
     def init_plot(self):
         return
@@ -271,47 +290,47 @@ class LatencyGUI(QtWidgets.QWizard):
     def save_additional_information_to_csv(self):
         print('Saving additional information to CSV')
 
-        authors = self.ui.lineEdit_authors.text()
-        publish_names = self.ui.checkBox_allow_name_publishing.isChecked()
-        email = self.ui.lineEdit_email.text()
-        additional_notes = self.ui.plainTextEdit_additional_notes.toPlainText()
-
-        print("Authors: ", authors)
-        print('Publish names', publish_names)
-        print('Email', email)
-        print('Notes', additional_notes)
-
-        # https://stackoverflow.com/questions/14471049/python-2-7-1-how-to-open-edit-and-close-a-csv-file
-
-        new_rows = []  # a holder for our modified rows when we make them
-        changes = {  # a dictionary of changes to make, find 'key' substitue with 'value'
-            '#author:;': '#author:;' + authors,
-            '#vendorId:;': '#vendorId:;' + self.vendor_id,
-            '#productId:;': '#productId:;' + self.product_id,
-            '#date:;': '#date:;' + datetime.today().strftime('%d-%m-%Y'),
-            '#bInterval:;': '#bInterval:;' + '????',  # TODO: Find out bInterval
-            '#deviceType:;': '#deviceType:;' + str(self.device_type),
-            '#email:;': '#email:;' + email,
-            '#public:;': '#public:;' + str(publish_names),
-            '#notes:;': '#notes:;' + additional_notes
-        }
-
-        filename = 'test.csv'
-
-        with open(filename, 'rb') as f:
-            reader = csv.reader(f)  # pass the file to our csv reader
-            for row in reader:  # iterate over the rows in the file
-                new_row = row  # at first, just copy the row
-                for key, value in changes.items():  # iterate over 'changes' dictionary
-                    new_row = [x.replace(key, value) for x in new_row]  # make the substitutions
-                new_rows.append(new_row)  # add the modified rows
-
-        with open(filename, 'wb') as f:
-            # Overwrite the old file with the modified rows
-            writer = csv.writer(f)
-            writer.writerows(new_rows)
-
-        self.upload_measurement()
+        # authors = self.ui.lineEdit_authors.text()
+        # publish_names = self.ui.checkBox_allow_name_publishing.isChecked()
+        # email = self.ui.lineEdit_email.text()
+        # additional_notes = self.ui.plainTextEdit_additional_notes.toPlainText()
+        #
+        # print("Authors: ", authors)
+        # print('Publish names', publish_names)
+        # print('Email', email)
+        # print('Notes', additional_notes)
+        #
+        # # https://stackoverflow.com/questions/14471049/python-2-7-1-how-to-open-edit-and-close-a-csv-file
+        #
+        # new_rows = []  # a holder for our modified rows when we make them
+        # changes = {  # a dictionary of changes to make, find 'key' substitue with 'value'
+        #     '#author:;': '#author:;' + authors,
+        #     '#vendorId:;': '#vendorId:;' + self.vendor_id,
+        #     '#productId:;': '#productId:;' + self.product_id,
+        #     '#date:;': '#date:;' + datetime.today().strftime('%d-%m-%Y'),
+        #     '#bInterval:;': '#bInterval:;' + '????',  # TODO: Find out bInterval
+        #     '#deviceType:;': '#deviceType:;' + str(self.device_type),
+        #     '#email:;': '#email:;' + email,
+        #     '#public:;': '#public:;' + str(publish_names),
+        #     '#notes:;': '#notes:;' + additional_notes
+        # }
+        #
+        # filename = 'test.csv'
+        #
+        # with open(filename, 'rb') as f:
+        #     reader = csv.reader(f)  # pass the file to our csv reader
+        #     for row in reader:  # iterate over the rows in the file
+        #         new_row = row  # at first, just copy the row
+        #         for key, value in changes.items():  # iterate over 'changes' dictionary
+        #             new_row = [x.replace(key, value) for x in new_row]  # make the substitutions
+        #         new_rows.append(new_row)  # add the modified rows
+        #
+        # with open(filename, 'wb') as f:
+        #     # Overwrite the old file with the modified rows
+        #     writer = csv.writer(f)
+        #     writer.writerows(new_rows)
+        #
+        # self.upload_measurement()
 
     # Upload the newly created .csv file of the latest measurement
     def upload_measurement(self):
@@ -401,9 +420,16 @@ class LatencyGUI(QtWidgets.QWizard):
                 self.ui.label_press_button_again.setText('')
                 self.ui.progressBar.setValue((int(line_id) / Constants.NUM_TEST_ITERATIONS) * 100)
                 self.ui.label_progress.setText(str(line_id) + '/' + str(Constants.NUM_TEST_ITERATIONS))
-                self.ui.label_last_measured_time.setText(str(line).split(',')[2].replace("\\n'", '') + 'ms')
+                measured_time = float(str(line).split(',')[2].replace("\\n'", ''))
+                self.ui.label_last_measured_time.setText(str(round(measured_time, Constants.NUM_DISPLAYED_DECIMAL_PLACES)) + 'ms')
 
-            if len(line) is 0 or 'cancelled' in str(line):
+            if 'done' in str(line):
+                print('Finished successful')
+                break
+            elif 'cancelled' in str(line):
+                print('Cancelled!')
+                sys.exit('Measurement failed')
+            elif len(line) is 0:
                 break  # As soon as no more data is sent, stdout will only return empty lines
 
         print("Reached end of loop")
