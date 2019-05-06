@@ -76,13 +76,10 @@ class LatencyGUI(QtWidgets.QWizard):
         self.show()
 
     def disable_back(self):
-        print('Page ID:', QtWidgets.QWizard.currentId(self))
-
         # Only show an back button on page 2 (ID 1)
         if QtWidgets.QWizard.currentId(self) is not 1:
             self.button(QtWidgets.QWizard.BackButton).hide()
         else:
-            print('Showing Back Button')
             self.button(QtWidgets.QWizard.BackButton).show()
 
     # The eventFilter catches all events. Enter presses are prevented
@@ -403,14 +400,12 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # Upload the newly created .csv file of the latest measurement
     def upload_measurement(self):
-        print('Pausing at upload')
-        return
         data = {'bureaucracy[0]': self.output_file_path,
                 'bureaucracy[1]': self.authors,
                 'bureaucracy[2]': self.email,
                 'bureaucracy[3]': int(self.publish_names is True),  # Convert "True"/"False" to 1 or 0
                 'bureaucracy[4]': self.additional_notes,
-                'bureaucracy[$$id]': '1',
+                'bureaucracy[$$id]': '1',  # ???
                 'id': 'projects:latency:upload'}
         print('Data:', data)
 
