@@ -18,15 +18,15 @@ class Constants:
 class Result:
 
     def __init__(self):
-        self.name = 'Logitech M50'
+        self.name = ''
         self.minDelay = 100
         self.maxDelay = 10000
         self.iterations = 1000
-        self.authors = 'Vitus'
-        self.vendorID = '1234-5678-9012'
-        self.productID = 'abcd-efgh-jklm'
+        self.authors = ''
+        self.vendorID = ''
+        self.productID = ''
         self.date = ''
-        self.bIntervall = 1000
+        self.bInterval = 1000
         self.deviceType = 'Mouse'
         self.mean = 0.0
         self.median = 0.0
