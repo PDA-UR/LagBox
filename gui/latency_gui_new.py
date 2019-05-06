@@ -36,7 +36,6 @@ class Constants:
 
     SERVER_URL = 'https://hci.ur.de/projects/latency/upload'  # URL to the server where .csv files of measurement data should get uploaded
 
-
 class LatencyGUI(QtWidgets.QWizard):
 
     device_objects = []
@@ -71,18 +70,23 @@ class LatencyGUI(QtWidgets.QWizard):
         # Set an eventFilter on the entire application
         qApp.installEventFilter(self)
 
+        self.currentIdChanged.connect(self.disable_back)
+
         self.init_ui_page_one()
         self.show()
 
-    # def keyPressEvent(self, event):
-    #     print('Keypress')
-    #     print(event.key())
-    #     if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter or event.key() == Qt.Key_Backspace:
-    #         print('Enter pressed')
-    #     else:
-    #         super().keyPressEvent(event)
+    def disable_back(self):
+        print('Page ID:', QtWidgets.QWizard.currentId(self))
+
+        # Only show an back button on page 2 (ID 1)
+        if QtWidgets.QWizard.currentId(self) is not 1:
+            self.button(QtWidgets.QWizard.BackButton).hide()
+        else:
+            print('Showing Back Button')
+            self.button(QtWidgets.QWizard.BackButton).show()
 
     # The eventFilter catches all events. Enter presses are prevented
+    # https://wiki.qt.io/How_to_catch_enter_key
     def eventFilter(self, obj, event):
         if event.type() == QEvent.KeyPress:
             if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
@@ -92,11 +96,10 @@ class LatencyGUI(QtWidgets.QWizard):
 
             # User interface for page one (Page where general settings are placed)
     def init_ui_page_one(self):
-        print('Init UI page 1')
-
-        self.button(QtWidgets.QWizard.BackButton).hide()
+        self.reset_all_data()
 
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
+        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Cancel')
         self.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
         self.ui.button_refresh.clicked.connect(self.get_connected_devices)
         self.ui.comboBox_device.currentIndexChanged.connect(self.on_combobox_device_changed)
@@ -104,9 +107,30 @@ class LatencyGUI(QtWidgets.QWizard):
         self.init_combobox_device_type(None)
         self.get_connected_devices()
 
+    def reset_all_data(self):
+        self.device_objects = []
+        self.device_id = -1
+        self.device_type = 2
+        self.button_code = -1
+        self.device_name = ''
+        self.vendor_id = ''
+        self.product_id = ''
+
+        self.output_file_path = ''  # Filepath and name of the created .csv file
+        self.stats = ''
+
+        self.authors = ''
+        self.publish_names = False
+        self.email = ''
+        self.additional_notes = ''
+
+        self.timer = None
+        self.is_measurement_running = False
+        self.measurement_finished = False
+
+
     # User interface for page two (Page where the detection of the input button takes place)
     def init_ui_page_two(self):
-        print('Init UI page 2')
         self.validate_inputs()
         self.get_device_bInterval()
 
@@ -119,6 +143,8 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.label_selected_device_type.setText(str(self.ui.comboBox_device_type.currentText()))
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Start Measurement')
 
+        self.ui.label_pressed_button_id.setText('')
+
         # Disable the button until the keycode has been found out
         self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
         self.ui.button_restart_measurement.setEnabled(True)
@@ -128,17 +154,12 @@ class LatencyGUI(QtWidgets.QWizard):
     # User interface for page three (Page where the LagBox measurement takes place)
     def init_ui_page_three(self):
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
+        self.ui.button(QtWidgets.QWizard.BackButton).clicked.disconnect(self.on_page_two_back_button_pressed)
 
-        print('Is running?', self.is_measurement_running)
         if not self.is_measurement_running:
             self.is_measurement_running = True
-            print('Is running?', self.is_measurement_running)
-
-            print('Init UI page 3')
-
             self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
             self.button(QtWidgets.QWizard.NextButton).hide()
-            self.button(QtWidgets.QWizard.BackButton).hide()
 
             # Measurement can only start after UI has loaded completely
             timer_start_measurement = QTimer(self)
@@ -148,9 +169,6 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # User interface for page four (Page that displays the results of the lagbox measurement)
     def init_ui_page_four(self):
-        print('Init UI page 4')
-
-        self.button(QtWidgets.QWizard.BackButton).hide()
         # self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_five)
 
@@ -167,44 +185,45 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # User interface for page five (Page that askes the user if he wants to upload the measurements)
     def init_ui_page_five(self):
-        print('Init Ui Page 5')
-
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Continue to Upload Results')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_five)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_six)
-        self.button(QtWidgets.QWizard.BackButton).hide()
 
-        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish without uploading results')
+        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Exit application without uploading results')
+
+        #TODO: Add custom button to restart the application to conduct a new measurement
+        #self.setOption(QtWidgets.QWizard.HaveCustomButton1, True)
+        #self.ui.setButtonText(QtWidgets.QWizard.CustomButton1, 'Start a new measurement without uploading results')
+        #self.button(QtWidgets.QWizard.CustomButton1).clicked.connect(self.restart_application)
+
+    def restart_application(self):
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_six)
+        self.setOption(QtWidgets.QWizard.HaveCustomButton1, False)
+        self.init_ui_page_one()
+        QtWidgets.QWizard.restart(self)
 
     # Init UI for page six (Accept the conditions for uploading measurements)
     def init_ui_page_six(self):
-        print('Init UI page 6')
+        self.setOption(QtWidgets.QWizard.HaveCustomButton1, False)
 
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Accept')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_six)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_seven)
-        self.button(QtWidgets.QWizard.BackButton).hide()
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish without uploading results')
 
     # User interface for page seven (Page where data about uploading the data is collected)
     def init_ui_page_seven(self):
-        print('Init UI page 7')
-
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Cancel Upload and Exit')
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Upload Results')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_seven)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.on_page_seven_next_button_pressed)
-        self.button(QtWidgets.QWizard.BackButton).hide()
 
         # TODO: Prefill the author field and maybe even the email field with information saved in a .ini file
         self.ui.lineEdit_authors.setText(os.environ['USER'])
 
     # User interface for page eight (Page where The user is thanked for its participation)
     def init_ui_page_eight(self):
-        print('Init UI page 8')
-
         self.button(QtWidgets.QWizard.NextButton).hide()
-        self.button(QtWidgets.QWizard.BackButton).hide()
         self.button(QtWidgets.QWizard.CancelButton).hide()
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish')
 
