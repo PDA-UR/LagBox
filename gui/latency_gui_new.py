@@ -443,7 +443,13 @@ class LatencyGUI(QtWidgets.QWizard):
                 sys.exit('Found an empty line in stdout. This should not happen')
                 #break  # As soon as no more data is sent, stdout will only return empty lines
 
-        self.create_data_plot()
+        if not self.measurement_finished:
+            self.measurement_finished = True
+            # self.create_data_plot()
+            timer_create_data_plot = QTimer(self)
+            timer_create_data_plot.setSingleShot(True)
+            timer_create_data_plot.timeout.connect(self.create_data_plot)
+            timer_create_data_plot.start(100)
 
 
         # TODO: Verify here if measurement was successful
