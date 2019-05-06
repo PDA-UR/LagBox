@@ -50,6 +50,11 @@ class LatencyGUI(QtWidgets.QWizard):
     output_file_path = ''  # Filepath and name of the created .csv file
     stats = ''
 
+    authors = ''
+    publish_names = False
+    email = ''
+    additional_notes = ''
+
     timer = None
 
     def __init__(self):
@@ -286,30 +291,30 @@ class LatencyGUI(QtWidgets.QWizard):
         print('Saving additional information to CSV')
         print('Path of csv file:', self.output_file_path)
 
-        authors = self.ui.lineEdit_authors.text()
-        publish_names = self.ui.checkBox_allow_name_publishing.isChecked()
-        email = self.ui.lineEdit_email.text()
-        additional_notes = self.ui.plainTextEdit_additional_notes.toPlainText()
+        self.authors = self.ui.lineEdit_authors.text()
+        self.publish_names = self.ui.checkBox_allow_name_publishing.isChecked()
+        self.email = self.ui.lineEdit_email.text()
+        self.additional_notes = self.ui.plainTextEdit_additional_notes.toPlainText()
 
-        print("Authors: ", authors)
-        print('Publish names', publish_names)
-        print('Email', email)
-        print('Notes', additional_notes)
+        print("Authors: ", self.authors)
+        print('Publish names', self.publish_names)
+        print('Email', self.email)
+        print('Notes', self.additional_notes)
 
         # Update data in existing csv file:
         # https://stackoverflow.com/questions/14471049/python-2-7-1-how-to-open-edit-and-close-a-csv-file
 
         new_rows = []  # a holder for our modified rows when we make them
         changes = {  # a dictionary of changes to make, find 'key' substitue with 'value'
-            '#author:;': '#author:;' + authors,
+            '#author:;': '#author:;' + self.authors,
             '#vendorId:;': '#vendorId:;' + self.vendor_id,
             '#productId:;': '#productId:;' + self.product_id,
             '#date:;': '#date:;' + datetime.today().strftime('%d-%m-%Y'),
             '#bInterval:;': '#bInterval:;' + str(self.get_device_bInterval()),
             '#deviceType:;': '#deviceType:;' + str(self.device_type),
-            '#email:;': '#email:;' + email,
-            '#public:;': '#public:;' + str(publish_names),
-            '#notes:;': '#notes:;' + additional_notes.replace("\n", " ")
+            '#email:;': '#email:;' + self.email,
+            '#public:;': '#public:;' + str(self.publish_names),
+            '#notes:;': '#notes:;' + self.additional_notes.replace("\n", " ")
         }
 
         with open(self.output_file_path, 'r') as f:
@@ -329,14 +334,16 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # Upload the newly created .csv file of the latest measurement
     def upload_measurement(self):
-        return
-        r = requests.post(Constants.SERVER_URL, data={'bureaucracy[0]': self.output_file_path,
-                                                      'bureaucracy[1]': 'NAME',
-                                                      'bureaucracy[2]': EMAIL,
-                                                      'bureaucracy[3]': '1 (entspricht True hier)',
-                                                      'bureaucracy[4]': 'Comments',
-                                                      'bureaucracy[$$id]': '1',
-                                                      'id': 'projects:latency:upload'})
+        data = {'bureaucracy[0]': self.output_file_path,
+                'bureaucracy[1]': self.authors,
+                'bureaucracy[2]': self.email,
+                'bureaucracy[3]': int(self.publish_names is True),  # Convert "True"/"False" to 1 or 0
+                'bureaucracy[4]': self.additional_notes,
+                'bureaucracy[$$id]': '1',
+                'id': 'projects:latency:upload'}
+        print('Data:', data)
+
+        r = requests.post(Constants.SERVER_URL, data=data)
         print(r.status_code, r.reason)
 
     # Extract all USB devices connected to the computer and save the details of each device as an object
