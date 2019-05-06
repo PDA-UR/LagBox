@@ -312,7 +312,7 @@ class LatencyGUI(QtWidgets.QWizard):
             '#notes:;': '#notes:;' + additional_notes
         }
 
-        with open(self.output_file_path, 'rb') as f:
+        with open(self.output_file_path, 'r') as f:
             reader = csv.reader(f)  # pass the file to our csv reader
             for row in reader:  # iterate over the rows in the file
                 new_row = row  # at first, just copy the row
@@ -320,7 +320,7 @@ class LatencyGUI(QtWidgets.QWizard):
                     new_row = [x.replace(key, value) for x in new_row]  # make the substitutions
                 new_rows.append(new_row)  # add the modified rows
 
-        with open(self.output_file_path, 'wb') as f:
+        with open(self.output_file_path, 'w') as f:
             # Overwrite the old file with the modified rows
             writer = csv.writer(f)
             writer.writerows(new_rows)
