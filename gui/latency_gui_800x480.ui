@@ -525,6 +525,7 @@ The next button you press will be used for the measurement.
     </property>
     <property name="font">
      <font>
+      <family>Monospace</family>
       <pointsize>72</pointsize>
      </font>
     </property>
