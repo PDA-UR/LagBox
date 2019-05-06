@@ -309,7 +309,7 @@ class LatencyGUI(QtWidgets.QWizard):
             '#deviceType:;': '#deviceType:;' + str(self.device_type),
             '#email:;': '#email:;' + email,
             '#public:;': '#public:;' + str(publish_names),
-            '#notes:;': '#notes:;' + additional_notes
+            '#notes:;': '#notes:;' + additional_notes.replace("\n", " ")
         }
 
         with open(self.output_file_path, 'r') as f:
