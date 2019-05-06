@@ -94,9 +94,10 @@ class LatencyGUI(QtWidgets.QWizard):
 
         return super().eventFilter(obj, event)
 
-            # User interface for page one (Page where general settings are placed)
+    # User interface for page one (Page where general settings are placed)
     def init_ui_page_one(self):
         self.reset_all_data()
+        self.button(QtWidgets.QWizard.BackButton).hide()
 
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Cancel')
@@ -330,7 +331,6 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # Extract the bInterval of the device
     def get_device_bInterval(self):
-        print('Searching bInterval of device')
         lines = []
 
         command = 'lsusb -vd ' + self.vendor_id + ':' + self.product_id + ' | grep bInterval'
@@ -420,8 +420,17 @@ class LatencyGUI(QtWidgets.QWizard):
                 name = device[1].replace('"', '').replace('N: Name=', '')
                 device_id = self.get_device_id(device[5])
                 device_type_auto_detected = self.get_device_type(device[5])
-                device_names.append(name)
-                self.device_objects.append(Device(vendor_id, product_id, name, device_id, device_type_auto_detected))
+
+                device_already_in_list = False
+                for existing_device in self.device_objects:
+                    if existing_device.name == name:
+                        device_already_in_list = True
+
+                # TODO: under cat /proc/bus/input/devices, a device sometimes appears multiple times.
+                # Verify that there is no difference between two entries
+                if not device_already_in_list:
+                    device_names.append(name)
+                    self.device_objects.append(Device(vendor_id, product_id, name, device_id, device_type_auto_detected))
 
         self.init_combobox_device(device_names)
 
@@ -515,7 +524,6 @@ class LatencyGUI(QtWidgets.QWizard):
 
         if not self.measurement_finished:
             self.measurement_finished = True
-            # self.create_data_plot()
             timer_create_data_plot = QTimer(self)
             timer_create_data_plot.setSingleShot(True)
             timer_create_data_plot.timeout.connect(self.create_data_plot)
