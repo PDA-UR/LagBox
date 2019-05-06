@@ -484,6 +484,7 @@ class LatencyGUI(QtWidgets.QWizard):
 
             if 'done' in str(line):
                 print('Finished successful')
+                self.ui.label_press_button_again.setText('Measurement finished. Analysing and saving data...')
                 break
             elif 'cancelled' in str(line):
                 sys.exit('Measurement failed')
