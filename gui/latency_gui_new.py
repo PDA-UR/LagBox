@@ -102,9 +102,7 @@ class LatencyGUI(QtWidgets.QWizard):
     # User interface for page three (Page where the LagBox measurement takes place)
     def init_ui_page_three(self):
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_four)
-        self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
+        self.button(QtWidgets.QWizard.NextButton).hide()
         self.button(QtWidgets.QWizard.BackButton).hide()
 
         timer_test = QTimer(self)
@@ -114,7 +112,7 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # User interface for page four (Page that displays the results of the lagbox measurement)
     def init_ui_page_four(self):
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_four)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_five)
         self.button(QtWidgets.QWizard.BackButton).hide()
 
@@ -455,6 +453,8 @@ class LatencyGUI(QtWidgets.QWizard):
         self.dataplotter = DataPlotter.DataPlotter()
         self.stats = self.dataplotter.process_filedata(self.output_file_path)
         print(self.stats)
+        self.init_ui_page_four()
+        self.ui.next()
 
 
 # An object representation of all relevant data about connected USB device
