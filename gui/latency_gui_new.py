@@ -136,7 +136,10 @@ class LatencyGUI(QtWidgets.QWizard):
         self.get_device_bInterval()
 
         self.ui.button_restart_measurement.clicked.connect(self.listen_for_key_inputs)
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_two)
+        try:
+            self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_two)
+        except TypeError:
+            pass
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_three)
         self.ui.button(QtWidgets.QWizard.BackButton).clicked.connect(self.on_page_two_back_button_pressed)
 
@@ -154,8 +157,11 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # User interface for page three (Page where the LagBox measurement takes place)
     def init_ui_page_three(self):
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
-        self.ui.button(QtWidgets.QWizard.BackButton).clicked.disconnect(self.on_page_two_back_button_pressed)
+        try:
+            self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
+            self.ui.button(QtWidgets.QWizard.BackButton).clicked.disconnect(self.on_page_two_back_button_pressed)
+        except TypeError:
+            pass
 
         if not self.is_measurement_running:
             self.is_measurement_running = True
@@ -233,12 +239,12 @@ class LatencyGUI(QtWidgets.QWizard):
         if self.timer is not None and self.timer.isActive():
             self.timer.stop()
             print('Stopped timer because back button was pressed')
-        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
 
         try:
             self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
         except TypeError:
-            print('back button was pressed before UI was loaded completely. No need to worry')
+            pass
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
 
     def on_page_seven_next_button_pressed(self):
@@ -522,7 +528,6 @@ class LatencyGUI(QtWidgets.QWizard):
                 self.output_file_path = str(line).replace("b'", '').replace("\\n'", '')
             elif len(line) is 0:
                 sys.exit('Found an empty line in stdout. This should not happen')
-                #break  # As soon as no more data is sent, stdout will only return empty lines
 
         if not self.measurement_finished:
             self.measurement_finished = True
@@ -531,14 +536,12 @@ class LatencyGUI(QtWidgets.QWizard):
             timer_create_data_plot.timeout.connect(self.create_data_plot)
             timer_create_data_plot.start(100)
 
-
         # TODO: Verify here if measurement was successful
         self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
 
     def create_data_plot(self):
         self.dataplotter = DataPlotter.DataPlotter()
         self.stats = self.dataplotter.process_filedata(self.output_file_path)
-        # print(self.stats)
         self.init_ui_page_four()
         self.ui.next()
 
