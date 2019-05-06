@@ -4,6 +4,7 @@
 import sys
 import numpy as np
 
+
 # All Constants are placed in their own class to find them more easily
 class Constants:
     CSV_DELIMITER = ';'
@@ -96,8 +97,7 @@ class DataPlotter:
         sns.set(font_scale=1.5)
 
         # TODO: If we could guarantee here that at least seaborn version 0.9 is installed, we should add "dodge=True"
-        ax = sns.swarmplot(x=latencies, hue=None, palette="colorblind", marker="H", orient="h", alpha=1,
-                           zorder=0)
+        ax = sns.swarmplot(x=latencies, hue=None, palette="colorblind", marker="H", orient="h", alpha=1, zorder=0)
 
         # plt.title("TEST")
         plt.xlabel("latency (ms)")

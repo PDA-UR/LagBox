@@ -179,10 +179,10 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.label_statistics.setText(self.stats)
 
         try:
-            image = QPixmap(self.output_file_path.replace('.csv', '.png')).scaledToHeight(190)
+            image = QPixmap(self.output_file_path.replace('.csv', '.png')).scaled(1000, 190, Qt.KeepAspectRatio)
             self.ui.label_image.setPixmap(image)
-        except:
-            print('PLOT IMAGE NOT AVAILABLE!')
+        except error:
+            print('PLOT IMAGE NOT AVAILABLE!', error)
 
     # User interface for page five (Page that askes the user if he wants to upload the measurements)
     def init_ui_page_five(self):
@@ -280,6 +280,7 @@ class LatencyGUI(QtWidgets.QWizard):
     # Detect the button a user pressed in order to get the ID of that button
     def listen_for_key_inputs(self):
         if self.ui.button_restart_measurement.isEnabled():
+            self.ui.label_pressed_button_id.setText('')
             self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
             self.ui.button_restart_measurement.setText('Measuring...')
             self.ui.button_restart_measurement.setEnabled(False)
@@ -484,6 +485,7 @@ class LatencyGUI(QtWidgets.QWizard):
     # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
     def start_measurement(self):
         print('Start Measurement')
+
         command = '../bin/inputLatencyMeasureTool' + \
                   ' -m ' + str(Constants.MODE) + \
                   ' -tmin 100 -tmax 10000' + \
