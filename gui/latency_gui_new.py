@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon, QPixmap, QIcon
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton, qApp
 
 from PyQt5.QtCore import QTimer, Qt, QEvent
 import sys
@@ -17,8 +18,7 @@ import requests
 
 import DataPlotter
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton, qApp
-from PyQt5.QtGui import QIcon
+
 
 
 class Constants:
@@ -85,9 +85,10 @@ class LatencyGUI(QtWidgets.QWizard):
     # The eventFilter catches all events. Enter presses are prevented
     # https://wiki.qt.io/How_to_catch_enter_key
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.KeyPress:
-            if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
-                return True
+        if event.type() == QEvent.KeyPress:  # Check for any KeyPress
+            if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter: # Check if pressed button is the Enter button
+                if not self.ui.plainTextEdit_additional_notes.hasFocus():  # Allow Enter Button presses in the multiline textfield
+                    return True
 
         return super().eventFilter(obj, event)
 
