@@ -676,9 +676,9 @@ The next button you press will be used for the measurement.
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>260</x>
+      <x>210</x>
       <y>230</y>
-      <width>251</width>
+      <width>361</width>
       <height>31</height>
      </rect>
     </property>
@@ -689,7 +689,7 @@ The next button you press will be used for the measurement.
      </font>
     </property>
     <property name="text">
-     <string>&lt;a href=&quot;https://hci.ur.de/&quot;&gt;https://hci.ur.de/&lt;/a&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://hci.ur.de/projects/latency&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://hci.ur.de/projects/latency&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -714,8 +714,8 @@ The next button you press will be used for the measurement.
     </property>
     <property name="text">
      <string>Please support our research and share your measurements. 
-By pressing the button &quot;Upload results&quot;, your current measurement
- will be  sent to us. 
+By pressing the button &quot;Continue to upload results&quot;, 
+your current measurement will be  sent to us. 
 
 All crowdsourced data can be found on</string>
     </property>
@@ -763,7 +763,7 @@ All crowdsourced data can be found on</string>
     </property>
     <property name="text">
      <string>If you do not want to share your measurements,
-just press &quot;Finish without uploading results&quot; to exit the application</string>
+just press &quot;Exit application without uploading results&quot;.</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -1116,9 +1116,9 @@ All crowdsourced data can be found on</string>
    <widget class="QLabel" name="label_8">
     <property name="geometry">
      <rect>
-      <x>260</x>
+      <x>230</x>
       <y>230</y>
-      <width>251</width>
+      <width>311</width>
       <height>31</height>
      </rect>
     </property>
@@ -1129,7 +1129,7 @@ All crowdsourced data can be found on</string>
      </font>
     </property>
     <property name="text">
-     <string>&lt;a href=&quot;https://hci.ur.de/&quot;&gt;https://hci.ur.de/&lt;/a&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://hci.ur.de/projects/latency&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://hci.ur.de/projects/latency&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
