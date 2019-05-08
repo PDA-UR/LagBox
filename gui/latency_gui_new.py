@@ -400,17 +400,18 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # Upload the newly created .csv file of the latest measurement
     def upload_measurement(self):
-        data = {'bureaucracy[0]': self.output_file_path,
-                'bureaucracy[1]': self.authors,
-                'bureaucracy[2]': self.email,
-                'bureaucracy[3]': int(self.publish_names is True),  # Convert "True"/"False" to 1 or 0
-                'bureaucracy[4]': self.additional_notes,
-                'bureaucracy[$$id]': '1',  # ???
-                'id': 'projects:latency:upload'}
-        print('Data:', data)
+        files = {
+            'bureaucracy[0]': (self.output_file_path, open(self.output_file_path, 'rb')),
+            'bureaucracy[1]': (None, self.authors),
+            'bureaucracy[2]': (None, self.email),
+            'bureaucracy[3]': (None, str(self.publish_names is True)),  # Convert "True"/"False" to 1 or 0
+            'bureaucracy[4]': (None, 'Comments'),
+            'bureaucracy[$$id]': (None, '1'),  # ???
+            'id': (None, 'projects:latency:upload'),
+        }
 
-        r = requests.post(Constants.SERVER_URL, data=data)
-        print(r.status_code, r.reason)
+        response = requests.post('https://hci.ur.de/projects/latency/upload', files=files)
+        print(response.status_code, response.reason)
 
     # Extract all USB devices connected to the computer and save the details of each device as an object
     def extract_relevant_devices(self, devices):
