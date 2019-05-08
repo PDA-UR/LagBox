@@ -4,7 +4,7 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QIcon, QPixmap
 
-from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtCore import QTimer, Qt, QEvent
 import sys
 from subprocess import Popen, PIPE, STDOUT
 import struct
@@ -17,24 +17,24 @@ import requests
 
 import DataPlotter
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton, qApp
 from PyQt5.QtGui import QIcon
 
 
 class Constants:
-    #UI_FILE = 'latency_gui.ui'
     UI_FILE = 'latency_gui_800x480.ui'
     DEVICE_TYPES = ['Gamepad', 'Mouse', 'Keyboard']
     DEVICE_TYPE_IDS = {'Gamepad': 1, 'Mouse': 2, 'Keyboard': 3}
     WINDOW_TITLE = 'LagBox'
     BUTTON_NEXT_DEFAULT_NAME = 'Next >'
 
-    MODE = 3  # (0 = stepper mode, 1 = stepper latency test mode, 2 = stepper reset mode, 3 = auto mode, 4 = pressure sensor test mode)
+    MODE = 3
+    # (0 = stepper mode, 1 = stepper latency test mode, 2 = stepper reset mode,
+    # 3 = auto mode, 4 = pressure sensor test mode)
     NUM_TEST_ITERATIONS = 100
     NUM_DISPLAYED_DECIMAL_PLACES = 1  # Number of decimal places displayed of the current measurement in ms
 
     SERVER_URL = 'https://hci.ur.de/projects/latency/upload'  # URL to the server where .csv files of measurement data should get uploaded
-
 
 class LatencyGUI(QtWidgets.QWizard):
 
@@ -49,7 +49,14 @@ class LatencyGUI(QtWidgets.QWizard):
     output_file_path = ''  # Filepath and name of the created .csv file
     stats = ''
 
+    authors = ''
+    publish_names = False
+    email = ''
+    additional_notes = ''
+
     timer = None
+    is_measurement_running = False
+    measurement_finished = False
 
     def __init__(self):
         super().__init__()
@@ -59,21 +66,66 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui = uic.loadUi(Constants.UI_FILE, self)
         self.setWindowTitle(Constants.WINDOW_TITLE)
         self.showFullScreen()
-        self.show()
+
+        # Set an eventFilter on the entire application
+        qApp.installEventFilter(self)
+
+        self.currentIdChanged.connect(self.disable_back)
 
         self.init_ui_page_one()
+        self.show()
+
+    def disable_back(self):
+        # Only show an back button on page 2 (ID 1)
+        if QtWidgets.QWizard.currentId(self) is not 1:
+            self.button(QtWidgets.QWizard.BackButton).hide()
+        else:
+            self.button(QtWidgets.QWizard.BackButton).show()
+
+    # The eventFilter catches all events. Enter presses are prevented
+    # https://wiki.qt.io/How_to_catch_enter_key
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.KeyPress:
+            if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+                return True
+
+        return super().eventFilter(obj, event)
 
     # User interface for page one (Page where general settings are placed)
     def init_ui_page_one(self):
+        self.reset_all_data()
+        self.button(QtWidgets.QWizard.BackButton).hide()
 
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
+        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Cancel')
         self.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
-        self.button(QtWidgets.QWizard.BackButton).hide()
         self.ui.button_refresh.clicked.connect(self.get_connected_devices)
         self.ui.comboBox_device.currentIndexChanged.connect(self.on_combobox_device_changed)
 
         self.init_combobox_device_type(None)
         self.get_connected_devices()
+
+    def reset_all_data(self):
+        self.device_objects = []
+        self.device_id = -1
+        self.device_type = 2
+        self.button_code = -1
+        self.device_name = ''
+        self.vendor_id = ''
+        self.product_id = ''
+
+        self.output_file_path = ''  # Filepath and name of the created .csv file
+        self.stats = ''
+
+        self.authors = ''
+        self.publish_names = False
+        self.email = ''
+        self.additional_notes = ''
+
+        self.timer = None
+        self.is_measurement_running = False
+        self.measurement_finished = False
+
 
     # User interface for page two (Page where the detection of the input button takes place)
     def init_ui_page_two(self):
@@ -81,12 +133,19 @@ class LatencyGUI(QtWidgets.QWizard):
         self.get_device_bInterval()
 
         self.ui.button_restart_measurement.clicked.connect(self.listen_for_key_inputs)
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_two)
+        try:
+            self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_two)
+        except TypeError:
+            pass
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_three)
         self.ui.button(QtWidgets.QWizard.BackButton).clicked.connect(self.on_page_two_back_button_pressed)
+
         self.ui.label_selected_device.setText(self.ui.lineEdit_device_name.text())
         self.ui.label_selected_device_type.setText(str(self.ui.comboBox_device_type.currentText()))
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Start Measurement')
+
+        self.ui.label_pressed_button_id.setText('')
+
         # Disable the button until the keycode has been found out
         self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
         self.ui.button_restart_measurement.setEnabled(True)
@@ -95,22 +154,27 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # User interface for page three (Page where the LagBox measurement takes place)
     def init_ui_page_three(self):
-        self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_four)
-        #self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
-        self.button(QtWidgets.QWizard.BackButton).hide()
+        try:
+            self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
+            self.ui.button(QtWidgets.QWizard.BackButton).clicked.disconnect(self.on_page_two_back_button_pressed)
+        except TypeError:
+            pass
 
-        timer_test = QTimer(self)
-        timer_test.setSingleShot(True)
-        timer_test.timeout.connect(self.start_measurement)
-        timer_test.start(100)
+        if not self.is_measurement_running:
+            self.is_measurement_running = True
+            self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
+            self.button(QtWidgets.QWizard.NextButton).hide()
+
+            # Measurement can only start after UI has loaded completely
+            timer_start_measurement = QTimer(self)
+            timer_start_measurement.setSingleShot(True)
+            timer_start_measurement.timeout.connect(self.start_measurement)
+            timer_start_measurement.start(100)
 
     # User interface for page four (Page that displays the results of the lagbox measurement)
     def init_ui_page_four(self):
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_four)
+        # self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_five)
-        self.button(QtWidgets.QWizard.BackButton).hide()
 
         # Path where the log will be saved
         self.ui.label_path_name.setText(os.path.dirname(os.path.realpath(__file__)).replace('gui', 'log'))
@@ -118,37 +182,52 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.label_statistics.setText(self.stats)
 
         try:
-            image = QPixmap(self.output_file_path.replace('.csv', '.png')).scaledToHeight(190)
+            image = QPixmap(self.output_file_path.replace('.csv', '.png')).scaled(1000, 190, Qt.KeepAspectRatio)
             self.ui.label_image.setPixmap(image)
-        except:
-            print('PLOT IMAGE NOT AVAILABLE!')
+        except error:
+            print('PLOT IMAGE NOT AVAILABLE!', error)
 
     # User interface for page five (Page that askes the user if he wants to upload the measurements)
     def init_ui_page_five(self):
-        print('Init Ui Page 5')
-
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Continue to Upload Results')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_five)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_six)
-        self.button(QtWidgets.QWizard.BackButton).hide()
 
+        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Exit application without uploading results')
+
+        #TODO: Add custom button to restart the application to conduct a new measurement
+        #self.setOption(QtWidgets.QWizard.HaveCustomButton1, True)
+        #self.ui.setButtonText(QtWidgets.QWizard.CustomButton1, 'Start a new measurement without uploading results')
+        #self.button(QtWidgets.QWizard.CustomButton1).clicked.connect(self.restart_application)
+
+    def restart_application(self):
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_six)
+        self.setOption(QtWidgets.QWizard.HaveCustomButton1, False)
+        self.init_ui_page_one()
+        QtWidgets.QWizard.restart(self)
+
+    # Init UI for page six (Accept the conditions for uploading measurements)
+    def init_ui_page_six(self):
+        self.setOption(QtWidgets.QWizard.HaveCustomButton1, False)
+
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Accept')
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_six)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_seven)
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish without uploading results')
 
-    # User interface for page six (Page where data about uploading the data is collected)
-    def init_ui_page_six(self):
+    # User interface for page seven (Page where data about uploading the data is collected)
+    def init_ui_page_seven(self):
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Cancel Upload and Exit')
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Upload Results')
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_six)
-        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.on_page_six_next_button_pressed)
-        self.button(QtWidgets.QWizard.BackButton).hide()
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_seven)
+        self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.on_page_seven_next_button_pressed)
 
         # TODO: Prefill the author field and maybe even the email field with information saved in a .ini file
         self.ui.lineEdit_authors.setText(os.environ['USER'])
 
-    # User interface for page seven (Page where The user is thanked for its participation)
-    def init_ui_page_seven(self):
+    # User interface for page eight (Page where The user is thanked for its participation)
+    def init_ui_page_eight(self):
         self.button(QtWidgets.QWizard.NextButton).hide()
-        self.button(QtWidgets.QWizard.BackButton).hide()
         self.button(QtWidgets.QWizard.CancelButton).hide()
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish')
 
@@ -157,17 +236,17 @@ class LatencyGUI(QtWidgets.QWizard):
         if self.timer is not None and self.timer.isActive():
             self.timer.stop()
             print('Stopped timer because back button was pressed')
-        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Next >')
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
 
         try:
             self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
         except TypeError:
-            print('back button was pressed before UI was loaded completely. No need to worry')
+            pass
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
 
-    def on_page_six_next_button_pressed(self):
+    def on_page_seven_next_button_pressed(self):
         self.save_additional_information_to_csv()
-        self.init_ui_page_seven()
+        self.init_ui_page_eight()
 
     # Fills the combobox with all possible device types defined in the constants
     def init_combobox_device_type(self, auto_detected_value):
@@ -204,10 +283,11 @@ class LatencyGUI(QtWidgets.QWizard):
     # Detect the button a user pressed in order to get the ID of that button
     def listen_for_key_inputs(self):
         if self.ui.button_restart_measurement.isEnabled():
+            self.ui.label_pressed_button_id.setText('')
             self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
             self.ui.button_restart_measurement.setText('Measuring...')
             self.ui.button_restart_measurement.setEnabled(False)
-            print("Starting measurement")
+            print("Starting Button detection")
 
             self.timer = QTimer(self)
             self.timer.timeout.connect(self.scan_key_inputs)
@@ -255,7 +335,6 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # Extract the bInterval of the device
     def get_device_bInterval(self):
-        print('Searching bInterval of device')
         lines = []
 
         command = 'lsusb -vd ' + self.vendor_id + ':' + self.product_id + ' | grep bInterval'
@@ -270,6 +349,7 @@ class LatencyGUI(QtWidgets.QWizard):
         print(lines)
 
         # TODO: Find correct bInterval value if there are multiple
+        return lines[0]
 
     # if a user chooses to share and upload his/her measurement results, additional data like the users name and
     # email-adress will be saved to the csv file
@@ -277,33 +357,33 @@ class LatencyGUI(QtWidgets.QWizard):
         print('Saving additional information to CSV')
         print('Path of csv file:', self.output_file_path)
 
-        authors = self.ui.lineEdit_authors.text()
-        publish_names = self.ui.checkBox_allow_name_publishing.isChecked()
-        email = self.ui.lineEdit_email.text()
-        additional_notes = self.ui.plainTextEdit_additional_notes.toPlainText()
+        self.authors = self.ui.lineEdit_authors.text()
+        self.publish_names = self.ui.checkBox_allow_name_publishing.isChecked()
+        self.email = self.ui.lineEdit_email.text()
+        self.additional_notes = self.ui.plainTextEdit_additional_notes.toPlainText()
 
-        print("Authors: ", authors)
-        print('Publish names', publish_names)
-        print('Email', email)
-        print('Notes', additional_notes)
+        print("Authors: ", self.authors)
+        print('Publish names', self.publish_names)
+        print('Email', self.email)
+        print('Notes', self.additional_notes)
 
         # Update data in existing csv file:
         # https://stackoverflow.com/questions/14471049/python-2-7-1-how-to-open-edit-and-close-a-csv-file
 
         new_rows = []  # a holder for our modified rows when we make them
         changes = {  # a dictionary of changes to make, find 'key' substitue with 'value'
-            '#author:;': '#author:;' + authors,
+            '#author:;': '#author:;' + self.authors,
             '#vendorId:;': '#vendorId:;' + self.vendor_id,
             '#productId:;': '#productId:;' + self.product_id,
             '#date:;': '#date:;' + datetime.today().strftime('%d-%m-%Y'),
-            '#bInterval:;': '#bInterval:;' + '????',  # TODO: Find out bInterval
+            '#bInterval:;': '#bInterval:;' + str(self.get_device_bInterval()),
             '#deviceType:;': '#deviceType:;' + str(self.device_type),
-            '#email:;': '#email:;' + email,
-            '#public:;': '#public:;' + str(publish_names),
-            '#notes:;': '#notes:;' + additional_notes
+            '#email:;': '#email:;' + self.email,
+            '#public:;': '#public:;' + str(self.publish_names),
+            '#notes:;': '#notes:;' + self.additional_notes.replace("\n", " ")
         }
 
-        with open(self.output_file_path, 'rb') as f:
+        with open(self.output_file_path, 'r') as f:
             reader = csv.reader(f)  # pass the file to our csv reader
             for row in reader:  # iterate over the rows in the file
                 new_row = row  # at first, just copy the row
@@ -311,7 +391,7 @@ class LatencyGUI(QtWidgets.QWizard):
                     new_row = [x.replace(key, value) for x in new_row]  # make the substitutions
                 new_rows.append(new_row)  # add the modified rows
 
-        with open(self.output_file_path, 'wb') as f:
+        with open(self.output_file_path, 'w') as f:
             # Overwrite the old file with the modified rows
             writer = csv.writer(f)
             writer.writerows(new_rows)
@@ -320,17 +400,20 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # Upload the newly created .csv file of the latest measurement
     def upload_measurement(self):
-        return
-        r = requests.post(Constants.SERVER_URL, data={'bureaucracy[0]': self.output_file_path,
-                                                      'bureaucracy[1]': 'NAME',
-                                                      'bureaucracy[2]': EMAIL,
-                                                      'bureaucracy[3]': '1 (entspricht True hier)',
-                                                      'bureaucracy[4]': 'Comments',
-                                                      'bureaucracy[$$id]': '1',
-                                                      'id': 'projects:latency:upload'})
-        print(r.status_code, r.reason)
+        files = {
+            'bureaucracy[0]': (self.output_file_path, open(self.output_file_path, 'rb')),
+            'bureaucracy[1]': (None, self.authors),
+            'bureaucracy[2]': (None, self.email),
+            'bureaucracy[3]': (None, str(self.publish_names is True)),  # Convert "True"/"False" to 1 or 0
+            'bureaucracy[4]': (None, 'Comments'),
+            'bureaucracy[$$id]': (None, '1'),  # ???
+            'id': (None, 'projects:latency:upload'),
+        }
 
-    # Exract all USB devices connected to the computer and save the details of each device as an object
+        response = requests.post('https://hci.ur.de/projects/latency/upload', files=files)
+        print(response.status_code, response.reason)
+
+    # Extract all USB devices connected to the computer and save the details of each device as an object
     def extract_relevant_devices(self, devices):
         device_names = []
         for device in devices:
@@ -340,8 +423,17 @@ class LatencyGUI(QtWidgets.QWizard):
                 name = device[1].replace('"', '').replace('N: Name=', '')
                 device_id = self.get_device_id(device[5])
                 device_type_auto_detected = self.get_device_type(device[5])
-                device_names.append(name)
-                self.device_objects.append(Device(vendor_id, product_id, name, device_id, device_type_auto_detected))
+
+                device_already_in_list = False
+                for existing_device in self.device_objects:
+                    if existing_device.name == name:
+                        device_already_in_list = True
+
+                # TODO: under cat /proc/bus/input/devices, a device sometimes appears multiple times.
+                # Verify that there is no difference between two entries
+                if not device_already_in_list:
+                    device_names.append(name)
+                    self.device_objects.append(Device(vendor_id, product_id, name, device_id, device_type_auto_detected))
 
         self.init_combobox_device(device_names)
 
@@ -380,6 +472,8 @@ class LatencyGUI(QtWidgets.QWizard):
                             self.timer.stop()  # Stop the timer so that this function is not called again
                             self.ui.button_restart_measurement.setText('Restart Button Detection')
                             self.ui.button_restart_measurement.setEnabled(True)
+
+                            # self.ui.button(QtWidgets.QWizard.NextButton).setFocusPolicy(Qt.NoFocus)
                             self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
 
                 # End loop after 25ms. The QTimer will restart it every 50ms.
@@ -392,8 +486,11 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
     def start_measurement(self):
+        print('Start Measurement')
+
         command = '../bin/inputLatencyMeasureTool' + \
                   ' -m ' + str(Constants.MODE) + \
+                  ' -tmin 100 -tmax 10000' + \
                   ' -b ' + str(self.button_code) + \
                   ' -d ' + str(self.device_type) + \
                   ' -event ' + str(self.device_id).replace('event', '') + \
@@ -419,25 +516,30 @@ class LatencyGUI(QtWidgets.QWizard):
 
             if 'done' in str(line):
                 print('Finished successful')
+                self.ui.label_press_button_again.setText('Measurement finished. Analysing and saving data...')
                 break
             elif 'cancelled' in str(line):
-                print('Cancelled!')
                 sys.exit('Measurement failed')
             elif '/log/' in str(line):
                 self.output_file_path = str(line).replace("b'", '').replace("\\n'", '')
             elif len(line) is 0:
-                break  # As soon as no more data is sent, stdout will only return empty lines
+                sys.exit('Found an empty line in stdout. This should not happen')
 
-        print("Reached end of loop")
-
-        print('A:', self.output_file_path)
-
-        self.dataplotter = DataPlotter.DataPlotter()
-        self.stats = self.dataplotter.process_filedata(self.output_file_path)
-        print(self.stats)
+        if not self.measurement_finished:
+            self.measurement_finished = True
+            timer_create_data_plot = QTimer(self)
+            timer_create_data_plot.setSingleShot(True)
+            timer_create_data_plot.timeout.connect(self.create_data_plot)
+            timer_create_data_plot.start(100)
 
         # TODO: Verify here if measurement was successful
         self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
+
+    def create_data_plot(self):
+        self.dataplotter = DataPlotter.DataPlotter()
+        self.stats = self.dataplotter.process_filedata(self.output_file_path)
+        self.init_ui_page_four()
+        self.ui.next()
 
 
 # An object representation of all relevant data about connected USB device
