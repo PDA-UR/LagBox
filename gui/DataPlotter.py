@@ -70,11 +70,12 @@ class DataPlotter:
 
         # TODO: Calculate additional stats (maybe ttest, ...)
 
-        return ('Mean: ' + str(round(mean, 3)) +
-                ' Median: ' + str(round(median, 3)) +
-                ' Minimum: ' + str(round(minimum, 3)) +
-                '\nMaximum: ' + str(round(maximum, 3)) +
-                ' Standard Deviation: ' + str(round(standard_deviation, 3)))
+        return ('<b>Mean:</b> ' + str(round(mean, 3)) + 'ms ' +
+                '<b>Median:</b> ' + str(round(median, 3)) + 'ms ' +
+                '<b>Standard Deviation:</b> ' + str(round(standard_deviation, 3)) + 'ms' +
+                '<br>' +
+                '<b>Minimum:</b> ' + str(round(minimum, 3)) + 'ms ' +
+                '<b>Maximum:</b> ' + str(round(maximum, 3)) + 'ms ')
 
     # Generate a plot from the extracted latencies
     def generate_plot(self, file_path, latencies):
