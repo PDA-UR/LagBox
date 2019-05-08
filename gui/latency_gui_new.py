@@ -15,6 +15,7 @@ import time
 import csv
 from datetime import datetime
 import requests
+import threading
 
 import DataPlotter
 
@@ -54,7 +55,8 @@ class LatencyGUI(QtWidgets.QWizard):
     email = ''
     additional_notes = ''
 
-    timer = None
+    #timer = None
+    scan_for_key_inputs = True
     is_measurement_running = False
     measurement_finished = False
 
@@ -123,7 +125,9 @@ class LatencyGUI(QtWidgets.QWizard):
         self.email = ''
         self.additional_notes = ''
 
-        self.timer = None
+        # self.timer = None
+        scan_for_key_inputs = True
+
         self.is_measurement_running = False
         self.measurement_finished = False
 
@@ -234,9 +238,10 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # Stop key detection if the user presses the back button and reconnect the "NextButton" to the correct function call
     def on_page_two_back_button_pressed(self):
-        if self.timer is not None and self.timer.isActive():
-            self.timer.stop()
-            print('Stopped timer because back button was pressed')
+        print('Back button pressed')
+        #if self.timer is not None and self.timer.isActive():
+        #    self.timer.stop()
+        #   print('Stopped timer because back button was pressed')
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
 
         try:
@@ -290,9 +295,12 @@ class LatencyGUI(QtWidgets.QWizard):
             self.ui.button_restart_measurement.setEnabled(False)
             print("Starting Button detection")
 
-            self.timer = QTimer(self)
-            self.timer.timeout.connect(self.scan_key_inputs)
-            self.timer.start(50)
+            self.scan_for_key_inputs = True
+            self.thread_scan_key_inputs = threading.Thread(target=self.scan_key_inputs)
+            self.thread_scan_key_inputs.start()
+            #self.timer = QTimer(self)
+            #self.timer.timeout.connect(self.scan_key_inputs)
+            #self.timer.start(50)
 
     def validate_inputs(self):
         self.device_name = self.ui.lineEdit_device_name.text()
@@ -459,9 +467,9 @@ class LatencyGUI(QtWidgets.QWizard):
     def scan_key_inputs(self):
         try:
             device = evdev.InputDevice('/dev/input/' + str(self.device_id))
-            time_start = time.time()  # Remember start time
+            #time_start = time.time()  # Remember start time
 
-            while True:
+            while self.scan_for_key_inputs:
                 event = device.read_one()  # Get current event
                 if event is not None:
                     if event.type == evdev.ecodes.EV_KEY:  # Check if the current event is a button press
@@ -470,17 +478,18 @@ class LatencyGUI(QtWidgets.QWizard):
                             self.button_code = key_event.scancode
                             print('ID of pressed button: ', self.button_code)
                             self.ui.label_pressed_button_id.setText(str(self.button_code))
-                            self.timer.stop()  # Stop the timer so that this function is not called again
+                            # self.timer.stop()  # Stop the timer so that this function is not called again
                             self.ui.button_restart_measurement.setText('Restart Button Detection')
                             self.ui.button_restart_measurement.setEnabled(True)
 
                             # self.ui.button(QtWidgets.QWizard.NextButton).setFocusPolicy(Qt.NoFocus)
                             self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
+                            return
 
                 # End loop after 25ms. The QTimer will restart it every 50ms.
                 # Therefore an additional 25ms remain for the user to interact with the UI in other ways.
-                if time.time() - time_start > 0.025:
-                    return
+                #if time.time() - time_start > 0.025:
+                #    return
 
         except PermissionError as error:
             print(error)  # TODO: Check if this error can happen on a Raspberry Pi
