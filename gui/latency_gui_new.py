@@ -309,6 +309,7 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # Get a list of all connected devices of the computer
     def get_connected_devices(self):
+        self.device_objects = []  # Reset list
         lines = []
 
         command = 'cat /proc/bus/input/devices'  # Get data about all connected devices
