@@ -184,8 +184,8 @@ class LatencyGUI(QtWidgets.QWizard):
         try:
             image = QPixmap(self.output_file_path.replace('.csv', '.png')).scaled(1000, 190, Qt.KeepAspectRatio)
             self.ui.label_image.setPixmap(image)
-        except error:
-            print('PLOT IMAGE NOT AVAILABLE!', error)
+        except Exception as e:
+            print('PLOT IMAGE NOT AVAILABLE!', e)
 
     # User interface for page five (Page that askes the user if he wants to upload the measurements)
     def init_ui_page_five(self):
