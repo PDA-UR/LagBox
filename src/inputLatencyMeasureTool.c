@@ -333,8 +333,8 @@ int main(int argc, char *argv[])
 
 	setupPins();
 
-    int minDelay = 10;//
-    int maxDelay = 1000;//
+    int minDelay = 100;//
+    int maxDelay = 10000;//
     int mode = 0; //
 
     int waitTime = 0;
