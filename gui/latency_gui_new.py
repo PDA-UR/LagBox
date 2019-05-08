@@ -11,7 +11,6 @@ from subprocess import Popen, PIPE, STDOUT
 import struct
 import evdev
 import os
-import time
 import csv
 from datetime import datetime
 import requests
@@ -26,6 +25,7 @@ class Constants:
     DEVICE_TYPE_IDS = {'Gamepad': 1, 'Mouse': 2, 'Keyboard': 3}
     WINDOW_TITLE = 'LagBox'
     BUTTON_NEXT_DEFAULT_NAME = 'Next >'
+    BUTTON_CANCEL_DEFAULT_NAME = 'Cancel'
 
     # (0 = stepper mode, 1 = stepper latency test mode, 2 = stepper reset mode,
     # 3 = auto mode, 4 = pressure sensor test mode)
@@ -61,7 +61,6 @@ class LatencyGUI(QtWidgets.QWizard):
     # Flag if the system is currently scanning for key inputs (for determining the pressed button)
     scan_for_key_inputs = True
     is_measurement_running = False  # Is the LagBox measurement currently running?
-    #measurement_finished = False  # Is the LagBox measurement completed?
 
     def __init__(self):
         super().__init__()
@@ -81,6 +80,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.init_ui_page_one()
         self.show()
 
+    # Disable the "Back Button" on all pages where it is not needed
     def disable_back(self):
         # Only show an back button on page 2 (ID 1)
         if QtWidgets.QWizard.currentId(self) is not 1:
@@ -106,7 +106,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.button(QtWidgets.QWizard.BackButton).hide()
 
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
-        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Cancel')
+        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, Constants.BUTTON_CANCEL_DEFAULT_NAME)
         self.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
         self.ui.button_refresh.clicked.connect(self.get_connected_devices)
         self.ui.comboBox_device.currentIndexChanged.connect(self.on_combobox_device_changed)
@@ -135,7 +135,6 @@ class LatencyGUI(QtWidgets.QWizard):
         self.scan_for_key_inputs = True
 
         self.is_measurement_running = False
-        #self.measurement_finished = False
 
     # User interface for page two (Page where the detection of the input button takes place)
     def init_ui_page_two(self):
@@ -531,9 +530,6 @@ class LatencyGUI(QtWidgets.QWizard):
                 self.output_file_path = str(line).replace("b'", '').replace("\\n'", '')
             elif len(line) is 0:
                 sys.exit('Found an empty line in stdout. This should not happen')
-
-        #if not self.measurement_finished:
-            #self.measurement_finished = True
 
         # The plot creation takes a moment on a Raspberry Pi. We start it with a QTimer to leave time for the UI
         # to update

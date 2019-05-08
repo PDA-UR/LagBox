@@ -89,12 +89,6 @@ class DataPlotter:
 
         #plt.rcParams.update({'font.size': Constants.PLOT_FONTSIZE})
         plt.figure(figsize=[Constants.PLOT_WIDTH, Constants.PLOT_HEIGHT])
-
-        # ax = sns.pointplot((values["latency"]), values["polling"], join=False, palette="dark", markers="D", scale=.75,
-        # ci="sd", zorder=1, errwidth=0.5, capsize=.2, ax =axes)
-        # ax = sns.swarmplot((values["latency"]), values["polling"], hue=None, palette="colorblind", size=1, dodge=True,
-        # marker="H",orient="h", alpha=1, zorder=0)
-
         sns.set(font_scale=1.5)
 
         # TODO: If we could guarantee here that at least seaborn version 0.9 is installed, we should add "dodge=True"
@@ -103,7 +97,6 @@ class DataPlotter:
         # plt.title("TEST")
         plt.xlabel("latency (ms)")
         #plt.xlim(Constants.PLOT_X_MIN, Constants.PLOT_X_MAX)
-
         plt.xlim(0, max(latencies) * 1.1)  # Leave 10% empty space on the right
 
         axes = plt.gca()
