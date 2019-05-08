@@ -59,7 +59,7 @@ class LatencyGUI(QtWidgets.QWizard):
     # Flag if the system is currently scanning for key inputs (for determining the pressed button)
     scan_for_key_inputs = True
     is_measurement_running = False  # Is the LagBox measurement currently running?
-    measurement_finished = False  # Is the LagBox measurement completed?
+    #measurement_finished = False  # Is the LagBox measurement completed?
 
     def __init__(self):
         super().__init__()
@@ -133,7 +133,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.scan_for_key_inputs = True
 
         self.is_measurement_running = False
-        self.measurement_finished = False
+        #self.measurement_finished = False
 
     # User interface for page two (Page where the detection of the input button takes place)
     def init_ui_page_two(self):
@@ -507,11 +507,7 @@ class LatencyGUI(QtWidgets.QWizard):
             print(line)
             line_id = str(line).split(',')[0].replace("b'", '')  # Convert line to String and remove the leading "b'"
             if line_id.isdigit():  # Only count the progress if the line is actually the result of a measurement
-                self.ui.label_press_button_again.setText('')
-                self.ui.progressBar.setValue((int(line_id) / Constants.NUM_TEST_ITERATIONS) * 100)
-                self.ui.label_progress.setText(str(line_id) + '/' + str(Constants.NUM_TEST_ITERATIONS))
-                measured_time = float(str(line).split(',')[2].replace("\\n'", ''))
-                self.ui.label_last_measured_time.setText(str(round(measured_time, Constants.NUM_DISPLAYED_DECIMAL_PLACES)) + 'ms')
+                self.display_progress(line_id, str(line))
 
             if 'done' in str(line):
                 print('Finished successful')
@@ -519,20 +515,32 @@ class LatencyGUI(QtWidgets.QWizard):
                 break
             elif 'cancelled' in str(line):
                 sys.exit('Measurement failed')
+            # At the end of the measurement, the filename and path of the created .csv file is returned.
+            # We save that path
             elif '/log/' in str(line):
                 self.output_file_path = str(line).replace("b'", '').replace("\\n'", '')
             elif len(line) is 0:
                 sys.exit('Found an empty line in stdout. This should not happen')
 
-        if not self.measurement_finished:
-            self.measurement_finished = True
-            timer_create_data_plot = QTimer(self)
-            timer_create_data_plot.setSingleShot(True)
-            timer_create_data_plot.timeout.connect(self.create_data_plot)
-            timer_create_data_plot.start(100)
+        #if not self.measurement_finished:
+            #self.measurement_finished = True
+
+        # The plot creation takes a moment on a Raspberry Pi. We start it with a QTimer to leave time for the UI
+        # to update
+        timer_create_data_plot = QTimer(self)
+        timer_create_data_plot.setSingleShot(True)
+        timer_create_data_plot.timeout.connect(self.create_data_plot)
+        timer_create_data_plot.start(100)
 
         # TODO: Verify here if measurement was successful
         self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
+
+    def display_progress(self, line_id, line):
+        self.ui.label_press_button_again.setText('')
+        self.ui.progressBar.setValue((int(line_id) / Constants.NUM_TEST_ITERATIONS) * 100)
+        self.ui.label_progress.setText(str(line_id) + '/' + str(Constants.NUM_TEST_ITERATIONS))
+        measured_time = float(line.split(',')[2].replace("\\n'", ''))
+        self.ui.label_last_measured_time.setText(str(round(measured_time, Constants.NUM_DISPLAYED_DECIMAL_PLACES)) + 'ms')
 
     def create_data_plot(self):
         self.dataplotter = DataPlotter.DataPlotter()
