@@ -37,6 +37,8 @@ class Constants:
     # URL to the server where .csv files of measurement data should get uploaded
     SERVER_URL = 'https://hci.ur.de/projects/latency/upload'
 
+    TEXT_INPUT_MAX_CHARS = 64
+
 
 class LatencyGUI(QtWidgets.QWizard):
 
@@ -304,6 +306,9 @@ class LatencyGUI(QtWidgets.QWizard):
         # TODO: Remove all non-allowed chars from device name and set a maximum length for the string
         self.device_type = Constants.DEVICE_TYPE_IDS[str(self.ui.comboBox_device_type.currentText()).replace(' (auto-detected)', '')]
 
+        if len(self.device_name) > Constants.TEXT_INPUT_MAX_CHARS:
+            self.device_name = self.device_name[:Constants.TEXT_INPUT_MAX_CHARS]
+
         print("Device name:", self.device_name)
         print("Device type ID:", self.device_type)
 
@@ -367,6 +372,11 @@ class LatencyGUI(QtWidgets.QWizard):
         self.publish_names = self.ui.checkBox_allow_name_publishing.isChecked()
         self.email = self.ui.lineEdit_email.text()
         self.additional_notes = self.ui.plainTextEdit_additional_notes.toPlainText()
+
+        if len(self.authors) > Constants.TEXT_INPUT_MAX_CHARS:
+            self.authors = self.authors[:Constants.TEXT_INPUT_MAX_CHARS]
+        if len(self.email) > Constants.TEXT_INPUT_MAX_CHARS:
+            self.email = self.email[:Constants.TEXT_INPUT_MAX_CHARS]
 
         print("Authors: ", self.authors)
         print('Publish names', self.publish_names)
