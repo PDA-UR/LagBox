@@ -3,9 +3,9 @@
 
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QIcon, QPixmap, QIcon
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton, qApp
-
+from PyQt5.QtWidgets import QApplication, qApp
 from PyQt5.QtCore import QTimer, Qt, QEvent
+
 import sys
 from subprocess import Popen, PIPE, STDOUT
 import struct
@@ -17,9 +17,7 @@ from datetime import datetime
 import requests
 import threading
 
-import DataPlotter
-
-
+import DataPlotter  # Accepts a .csv file of a LagBox measurement and returns a dataplot and statistical data
 
 
 class Constants:
@@ -29,36 +27,39 @@ class Constants:
     WINDOW_TITLE = 'LagBox'
     BUTTON_NEXT_DEFAULT_NAME = 'Next >'
 
-    MODE = 3
     # (0 = stepper mode, 1 = stepper latency test mode, 2 = stepper reset mode,
     # 3 = auto mode, 4 = pressure sensor test mode)
+    MODE = 3
+
     NUM_TEST_ITERATIONS = 100
     NUM_DISPLAYED_DECIMAL_PLACES = 1  # Number of decimal places displayed of the current measurement in ms
 
-    SERVER_URL = 'https://hci.ur.de/projects/latency/upload'  # URL to the server where .csv files of measurement data should get uploaded
+    # URL to the server where .csv files of measurement data should get uploaded
+    SERVER_URL = 'https://hci.ur.de/projects/latency/upload'
+
 
 class LatencyGUI(QtWidgets.QWizard):
 
-    device_objects = []
-    device_id = -1
+    device_objects = []  # Temporary storage for info about all detected input devices
+    device_id = -1  # ID of the currently connected device
     device_type = 2
-    button_code = -1
-    device_name = ''
-    vendor_id = ''
-    product_id = ''
+    button_code = -1  # Code of the button that should be used for LagBox measurements
+    device_name = ''  # Name of the device. Changeable by user
+    vendor_id = ''  # Vendor ID of the device
+    product_id = ''  # Product ID of the device
 
-    output_file_path = ''  # Filepath and name of the created .csv file
-    stats = ''
+    output_file_path = ''  # File path and name of the created .csv file
+    stats = ''  # Stats about the data of the current measurement (Mean, Median, Min, Max, Standard Deviation)
 
-    authors = ''
-    publish_names = False
-    email = ''
-    additional_notes = ''
+    authors = ''  # Optional field for storing the names of the persons who conducted the current measurement
+    publish_names = False  # Flag whether the names of the authors should get published
+    email = ''  # Optional field for storing the email adress of the person who conducted the measurement
+    additional_notes = ''  # Optional fields for storing additional notes about the current measurement
 
-    #timer = None
+    # Flag if the system is currently scanning for key inputs (for determining the pressed button)
     scan_for_key_inputs = True
-    is_measurement_running = False
-    measurement_finished = False
+    is_measurement_running = False  # Is the LagBox measurement currently running?
+    measurement_finished = False  # Is the LagBox measurement completed?
 
     def __init__(self):
         super().__init__()
@@ -69,9 +70,10 @@ class LatencyGUI(QtWidgets.QWizard):
         self.setWindowTitle(Constants.WINDOW_TITLE)
         self.showFullScreen()
 
-        # Set an eventFilter on the entire application
+        # Set an eventFilter on the entire application to catch key inputs
         qApp.installEventFilter(self)
 
+        # The "Back" button needs to be disabled for each page separately
         self.currentIdChanged.connect(self.disable_back)
 
         self.init_ui_page_one()
@@ -88,8 +90,10 @@ class LatencyGUI(QtWidgets.QWizard):
     # https://wiki.qt.io/How_to_catch_enter_key
     def eventFilter(self, obj, event):
         if event.type() == QEvent.KeyPress:  # Check for any KeyPress
-            if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter: # Check if pressed button is the Enter button
-                if not self.ui.plainTextEdit_additional_notes.hasFocus():  # Allow Enter Button presses in the multiline textfield
+            # Check if pressed button is the Enter button
+            if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+                # Allow Enter Button presses in the multiline textfield
+                if not self.ui.plainTextEdit_additional_notes.hasFocus():
                     return True
 
         return super().eventFilter(obj, event)
@@ -108,6 +112,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.init_combobox_device_type(None)
         self.get_connected_devices()
 
+    # When conducting another measurement, all data should get reset
     def reset_all_data(self):
         self.device_objects = []
         self.device_id = -1
@@ -117,7 +122,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.vendor_id = ''
         self.product_id = ''
 
-        self.output_file_path = ''  # Filepath and name of the created .csv file
+        self.output_file_path = ''
         self.stats = ''
 
         self.authors = ''
@@ -125,12 +130,10 @@ class LatencyGUI(QtWidgets.QWizard):
         self.email = ''
         self.additional_notes = ''
 
-        # self.timer = None
-        scan_for_key_inputs = True
+        self.scan_for_key_inputs = True
 
         self.is_measurement_running = False
         self.measurement_finished = False
-
 
     # User interface for page two (Page where the detection of the input button takes place)
     def init_ui_page_two(self):
@@ -236,12 +239,10 @@ class LatencyGUI(QtWidgets.QWizard):
         self.button(QtWidgets.QWizard.CancelButton).hide()
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Finish')
 
-    # Stop key detection if the user presses the back button and reconnect the "NextButton" to the correct function call
+    # When pressing the back button on page two, we want to keep all previously stored information
+    # But the text of the navigation buttons needs to be reverted.
     def on_page_two_back_button_pressed(self):
-        print('Back button pressed')
-        #if self.timer is not None and self.timer.isActive():
-        #    self.timer.stop()
-        #   print('Stopped timer because back button was pressed')
+        self.scan_for_key_inputs = False
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
 
         try:
@@ -293,14 +294,10 @@ class LatencyGUI(QtWidgets.QWizard):
             self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
             self.ui.button_restart_measurement.setText('Measuring...')
             self.ui.button_restart_measurement.setEnabled(False)
-            print("Starting Button detection")
 
             self.scan_for_key_inputs = True
-            self.thread_scan_key_inputs = threading.Thread(target=self.scan_key_inputs)
-            self.thread_scan_key_inputs.start()
-            #self.timer = QTimer(self)
-            #self.timer.timeout.connect(self.scan_key_inputs)
-            #self.timer.start(50)
+            thread_scan_key_inputs = threading.Thread(target=self.scan_key_inputs)
+            thread_scan_key_inputs.start()
 
     def validate_inputs(self):
         self.device_name = self.ui.lineEdit_device_name.text()
@@ -309,7 +306,6 @@ class LatencyGUI(QtWidgets.QWizard):
 
         print("Device name:", self.device_name)
         print("Device type ID:", self.device_type)
-
 
     # Get a list of all connected devices of the computer
     def get_connected_devices(self):
@@ -465,9 +461,9 @@ class LatencyGUI(QtWidgets.QWizard):
     # This function will listen for all key inputs of a given device. As soon as the first key-down press is detected,
     # The detection loop will end.
     def scan_key_inputs(self):
+        print('Starting Key Detection')
         try:
             device = evdev.InputDevice('/dev/input/' + str(self.device_id))
-            #time_start = time.time()  # Remember start time
 
             while self.scan_for_key_inputs:
                 event = device.read_one()  # Get current event
@@ -476,20 +472,12 @@ class LatencyGUI(QtWidgets.QWizard):
                         key_event = evdev.categorize(event)
                         if key_event.keystate:  # Check if button is pressed down
                             self.button_code = key_event.scancode
-                            print('ID of pressed button: ', self.button_code)
                             self.ui.label_pressed_button_id.setText(str(self.button_code))
-                            # self.timer.stop()  # Stop the timer so that this function is not called again
                             self.ui.button_restart_measurement.setText('Restart Button Detection')
                             self.ui.button_restart_measurement.setEnabled(True)
-
-                            # self.ui.button(QtWidgets.QWizard.NextButton).setFocusPolicy(Qt.NoFocus)
                             self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
+                            self.scan_for_key_inputs = False
                             return
-
-                # End loop after 25ms. The QTimer will restart it every 50ms.
-                # Therefore an additional 25ms remain for the user to interact with the UI in other ways.
-                #if time.time() - time_start > 0.025:
-                #    return
 
         except PermissionError as error:
             print(error)  # TODO: Check if this error can happen on a Raspberry Pi
