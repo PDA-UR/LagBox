@@ -15,6 +15,7 @@ import csv
 from datetime import datetime
 import requests
 import threading
+import configparser
 
 import DataPlotter  # Accepts a .csv file of a LagBox measurement and returns a dataplot and statistical data
 
@@ -79,6 +80,7 @@ class LatencyGUI(QtWidgets.QWizard):
 
         self.init_ui_page_one()
         self.show()
+        self.save_name_email_locally()
 
     # Disable the "Back Button" on all pages where it is not needed
     def disable_back(self):
@@ -235,6 +237,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.on_page_seven_next_button_pressed)
 
         # TODO: Prefill the author field and maybe even the email field with information saved in a .ini file
+        self.get_saved_name_email()
         self.ui.lineEdit_authors.setText(os.environ['USER'])
 
         timer_test_connection = QTimer(self)
@@ -261,6 +264,10 @@ class LatencyGUI(QtWidgets.QWizard):
 
     def on_page_seven_next_button_pressed(self):
         self.save_additional_information_to_csv()
+
+        if self.ui.checkBox_save_name_email_locally.isChecked():
+            self.save_name_email_locally()
+
         self.init_ui_page_eight()
 
     # Before the user is allowed to upload the current measurement, we need to check if a network connection is
@@ -277,6 +284,32 @@ class LatencyGUI(QtWidgets.QWizard):
             print('No connection possible...')
             self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Waiting for network connection...')
             self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
+
+    # https://stackoverflow.com/questions/44907415/python-configparser-create-file-if-it-doesnt-exist
+    def save_name_email_locally(self):
+        print('Saving name and email in a local .ini file')
+        config = configparser.ConfigParser()
+
+        if not os.path.exists('config.ini'):
+            config['upload'] = {'authors': os.environ['USER'], 'email': ''}
+            config.write(open('config.ini', 'w'))
+
+        config.read('config.ini')
+
+        config['upload']['authors'] = self.ui.lineEdit_authors.text()
+        config['upload']['email'] = self.ui.lineEdit_email.text()
+
+        with open('config.ini', 'w') as configfile:
+            config.write(configfile)
+
+    def get_saved_name_email(self):
+        if os.path.exists('config.ini'):
+            config = configparser.ConfigParser()
+            if config.has_option('upload', 'authors') and config.has_option('upload', 'email'):
+                print(config['upload']['authors'])
+                print(config['upload']['email'])
+                return
+        print('No saved information available.')
 
     # Fills the combobox with all possible device types defined in the constants
     def init_combobox_device_type(self, auto_detected_value):
@@ -400,9 +433,9 @@ class LatencyGUI(QtWidgets.QWizard):
             self.email = self.email[:Constants.TEXT_INPUT_MAX_CHARS]
 
         print("Authors: ", self.authors)
-        print('Publish names', self.publish_names)
-        print('Email', self.email)
-        print('Notes', self.additional_notes)
+        print('Publish names:', self.publish_names)
+        print('Email:', self.email)
+        print('Notes:', self.additional_notes)
 
         # Update data in existing csv file:
         # https://stackoverflow.com/questions/14471049/python-2-7-1-how-to-open-edit-and-close-a-csv-file
