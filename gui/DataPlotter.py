@@ -18,13 +18,20 @@ class Constants:
 
 class DataPlotter:
 
+    def __init__(self):
+        # When starting the script, it is checked if the filename is passed over as an argument
+        if len(sys.argv) > 1:
+            file_path = sys.argv[1]
+            print('Received filename argument:', file_path)
+            self.process_filedata(file_path)
+
     # Reads in a csv file and hands the data over at the end
     def process_filedata(self, file_path):
 
         try:
             current_file = open(file_path, 'r').readlines()  # Open the csv File
         except:
-            sys.exit("file missing: " + file_path)
+            sys.exit("File missing: " + file_path)
 
         comment_lines = []  # All lines containing a comment (==> Metadata about the measurement)
         measurement_rows = []  # All lines containing actual measurement data
