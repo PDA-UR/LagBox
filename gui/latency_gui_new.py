@@ -226,13 +226,20 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # User interface for page seven (Page where data about uploading the data is collected)
     def init_ui_page_seven(self):
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Waiting for network connection...')
+        self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
+        self.test_connection()
+
         self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Cancel Upload and Exit')
-        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Upload Results')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_seven)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.on_page_seven_next_button_pressed)
 
         # TODO: Prefill the author field and maybe even the email field with information saved in a .ini file
         self.ui.lineEdit_authors.setText(os.environ['USER'])
+
+        timer_test_connection = QTimer(self)
+        timer_test_connection.timeout.connect(self.test_connection)
+        timer_test_connection.start(5000)
 
     # User interface for page eight (Page where The user is thanked for its participation)
     def init_ui_page_eight(self):
@@ -255,6 +262,21 @@ class LatencyGUI(QtWidgets.QWizard):
     def on_page_seven_next_button_pressed(self):
         self.save_additional_information_to_csv()
         self.init_ui_page_eight()
+
+    # Before the user is allowed to upload the current measurement, we need to check if a network connection is
+    # available
+    def test_connection(self):
+        print('Checking connection...')
+        try:
+            r = requests.get(Constants.SERVER_URL)
+            r.raise_for_status()
+            print('Connection test successful!')
+            self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
+            self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Upload Results')
+        except:
+            print('No connection possible...')
+            self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Waiting for network connection...')
+            self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(False)
 
     # Fills the combobox with all possible device types defined in the constants
     def init_combobox_device_type(self, auto_detected_value):
@@ -436,7 +458,7 @@ class LatencyGUI(QtWidgets.QWizard):
         except requests.exceptions.Timeout as errt:
             print("Timeout Error:", errt)
         except requests.exceptions.RequestException as err:
-            print("OOps: Something Else", err)
+            print("Request Exception", err)
 
     # Extract all USB devices connected to the computer and save the details of each device as an object
     def extract_relevant_devices(self, devices):
