@@ -80,7 +80,6 @@ class LatencyGUI(QtWidgets.QWizard):
 
         self.init_ui_page_one()
         self.show()
-        self.save_name_email_locally()
 
     # Disable the "Back Button" on all pages where it is not needed
     def disable_back(self):
@@ -236,9 +235,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_seven)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.on_page_seven_next_button_pressed)
 
-        # TODO: Prefill the author field and maybe even the email field with information saved in a .ini file
         self.get_saved_name_email()
-        self.ui.lineEdit_authors.setText(os.environ['USER'])
 
         timer_test_connection = QTimer(self)
         timer_test_connection.timeout.connect(self.test_connection)
@@ -295,21 +292,22 @@ class LatencyGUI(QtWidgets.QWizard):
             config.write(open('config.ini', 'w'))
 
         config.read('config.ini')
-
         config['upload']['authors'] = self.ui.lineEdit_authors.text()
         config['upload']['email'] = self.ui.lineEdit_email.text()
 
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
 
+    # If an .ini file containing a saved name and email exists, this data will be used to prefill the UI elements
     def get_saved_name_email(self):
         if os.path.exists('config.ini'):
             config = configparser.ConfigParser()
+            config.read('config.ini')
             if config.has_option('upload', 'authors') and config.has_option('upload', 'email'):
-                print(config['upload']['authors'])
-                print(config['upload']['email'])
+                self.ui.lineEdit_authors.setText(config['upload']['authors'])
+                self.ui.lineEdit_email.setText(config['upload']['email'])
                 return
-        print('No saved information available.')
+        self.ui.lineEdit_authors.setText(os.environ['USER'])
 
     # Fills the combobox with all possible device types defined in the constants
     def init_combobox_device_type(self, auto_detected_value):

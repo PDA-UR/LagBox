@@ -1103,7 +1103,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
      </font>
     </property>
     <property name="text">
-     <string>Save your name and email locally to facilitate future uploads</string>
+     <string>Save name(s) and email locally to facilitate future uploads</string>
     </property>
    </widget>
   </widget>
