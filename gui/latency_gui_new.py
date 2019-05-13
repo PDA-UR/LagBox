@@ -422,11 +422,21 @@ class LatencyGUI(QtWidgets.QWizard):
             'bureaucracy[3]': (None, str(self.publish_names is True)),  # Convert "True"/"False" to 1 or 0
             'bureaucracy[4]': (None, 'Comments'),
             'bureaucracy[$$id]': (None, '1'),  # ???
-            'id': (None, 'projects:latency:upload'),
+            'id': (None, 'projects:latency:upload')
         }
 
-        response = requests.post('https://hci.ur.de/projects/latency/upload', files=files)
-        print(response.status_code, response.reason)
+        try:
+            response = requests.post('https://hci.ur.de/projects/latency/upload', files=files)
+            print(response.status_code, response.reason)
+        # https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
+        except requests.exceptions.HTTPError as errh:
+            print("Http Error:", errh)
+        except requests.exceptions.ConnectionError as errc:
+            print("Error Connecting:", errc)
+        except requests.exceptions.Timeout as errt:
+            print("Timeout Error:", errt)
+        except requests.exceptions.RequestException as err:
+            print("OOps: Something Else", err)
 
     # Extract all USB devices connected to the computer and save the details of each device as an object
     def extract_relevant_devices(self, devices):
