@@ -901,7 +901,7 @@ The measurements will be automatically analyzed and put online. By uploading a f
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>64</y>
+      <y>54</y>
       <width>581</width>
       <height>31</height>
      </rect>
@@ -922,7 +922,7 @@ The measurements will be automatically analyzed and put online. By uploading a f
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>64</y>
+      <y>54</y>
       <width>211</width>
       <height>31</height>
      </rect>
@@ -940,7 +940,7 @@ The measurements will be automatically analyzed and put online. By uploading a f
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>100</y>
+      <y>90</y>
       <width>751</width>
       <height>41</height>
      </rect>
@@ -957,7 +957,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>190</y>
+      <y>170</y>
       <width>581</width>
       <height>31</height>
      </rect>
@@ -978,7 +978,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>220</y>
+      <y>200</y>
       <width>741</width>
       <height>21</height>
      </rect>
@@ -994,7 +994,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>190</y>
+      <y>170</y>
       <width>211</width>
       <height>31</height>
      </rect>
@@ -1012,7 +1012,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>150</y>
+      <y>130</y>
       <width>641</width>
       <height>22</height>
      </rect>
@@ -1074,7 +1074,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>20</y>
+      <y>10</y>
       <width>331</width>
       <height>31</height>
      </rect>
@@ -1086,6 +1086,24 @@ If you want your name(s) to appear on the results page, please check the checkbo
     </property>
     <property name="text">
      <string>Upload Measurements</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_save_name_email_locally">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>230</y>
+      <width>641</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Save your name and email locally to facilitate future uploads</string>
     </property>
    </widget>
   </widget>
