@@ -266,6 +266,28 @@ to make it easier for others to find your device.</string>
      <string>EAN/UPC</string>
     </property>
    </widget>
+   <widget class="QLabel" name="label_hint_missing_modules">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>400</y>
+      <width>761</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignHCenter|Qt::AlignTop</set>
+    </property>
+   </widget>
   </widget>
   <widget class="QWizardPage" name="wizardPage2">
    <widget class="QLabel" name="label_title_2">

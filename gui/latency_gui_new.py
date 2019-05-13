@@ -113,7 +113,19 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.comboBox_device.currentIndexChanged.connect(self.on_combobox_device_changed)
 
         self.init_combobox_device_type(None)
+        self.check_installed_modules()
         self.get_connected_devices()
+
+    # Check if all necessary modules for visualizing the data are installed
+    def check_installed_modules(self):
+        try:
+            import numpy as np
+            from matplotlib import pyplot as plt
+            import seaborn as sns
+        except ImportError as e:
+            print('Missing modules:', e)
+            self.ui.label_hint_missing_modules.setText('Warning: Missing python modules - Visualisaztion of data will '
+                                                       'not be possible. Please install numpy, matplotlib and seaborn.')
 
     # When conducting another measurement, all data should get reset
     def reset_all_data(self):
