@@ -42,7 +42,7 @@ class Constants:
 
     TEXT_INPUT_MAX_CHARS = 64  # Max number of chars of the input fields
 
-    GPIO_PIN_ID = 11  # ID of the GPIO Pin where the optocoupler is connected to the Raspberry Pi
+    GPIO_PIN_ID = 7  # ID of the GPIO Pin where the optocoupler is connected to the Raspberry Pi
 
 
 class LatencyGUI(QtWidgets.QWizard):
@@ -73,11 +73,12 @@ class LatencyGUI(QtWidgets.QWizard):
         self.reset_gpio_pins()
         self.init_ui()
 
+    # Make sure that the GPIO pin where the raspberry Pi is connected to the optocoupler is set to LOW on startup
+    # Otherwise this could cause unwanted button presses.
     def reset_gpio_pins(self):
-        GPIO.setmode(GPIO.BOARD)
-        GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.BCM)
         GPIO.setup(Constants.GPIO_PIN_ID, GPIO.OUT)
-        GPIO.output(Constants.GPIO_PIN_ID, False)
+        GPIO.output(Constants.GPIO_PIN_ID, GPIO.LOW)
 
     def init_ui(self):
         self.ui = uic.loadUi(Constants.UI_FILE, self)
