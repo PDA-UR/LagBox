@@ -19,6 +19,8 @@ import configparser
 
 import DataPlotter  # Accepts a .csv file of a LagBox measurement and returns a dataplot and statistical data
 
+import RPi.GPIO as GPIO
+
 
 class Constants:
     UI_FILE = 'latency_gui_800x480.ui'
@@ -39,6 +41,8 @@ class Constants:
     SERVER_URL = 'https://hci.ur.de/projects/latency/upload'
 
     TEXT_INPUT_MAX_CHARS = 64
+
+    GPIO_PIN_ID = 11
 
 
 class LatencyGUI(QtWidgets.QWizard):
@@ -65,7 +69,14 @@ class LatencyGUI(QtWidgets.QWizard):
 
     def __init__(self):
         super().__init__()
+        self.reset_gpio_pins()
         self.init_ui()
+
+    def reset_gpio_pins(self):
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setwarnings(False)
+        GPIO.setup(Constants.GPIO_PIN_ID, GPIO.OUT)
+        GPIO.output(Constants.GPIO_PIN_ID, False)
 
     def init_ui(self):
         self.ui = uic.loadUi(Constants.UI_FILE, self)
