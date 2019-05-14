@@ -40,9 +40,9 @@ class Constants:
     # URL to the server where .csv files of measurement data should get uploaded
     SERVER_URL = 'https://hci.ur.de/projects/latency/upload'
 
-    TEXT_INPUT_MAX_CHARS = 64
+    TEXT_INPUT_MAX_CHARS = 64  # Max number of chars of the input fields
 
-    GPIO_PIN_ID = 11
+    GPIO_PIN_ID = 11  # ID of the GPIO Pin where the optocoupler is connected to the Raspberry Pi
 
 
 class LatencyGUI(QtWidgets.QWizard):
@@ -54,6 +54,7 @@ class LatencyGUI(QtWidgets.QWizard):
     device_name = ''  # Name of the device. Changeable by user
     vendor_id = ''  # Vendor ID of the device
     product_id = ''  # Product ID of the device
+    ean_upc = ''  # EAN (European Article Number) / UPC (Universal Product code)
 
     output_file_path = ''  # File path and name of the created .csv file
     stats = ''  # Stats about the data of the current measurement (Mean, Median, Min, Max, Standard Deviation)
@@ -471,7 +472,8 @@ class LatencyGUI(QtWidgets.QWizard):
             '#deviceType:;': '#deviceType:;' + str(self.device_type),
             '#email:;': '#email:;' + self.email,
             '#public:;': '#public:;' + str(self.publish_names),
-            '#notes:;': '#notes:;' + self.additional_notes.replace("\n", " ")
+            '#notes:;': '#notes:;' + self.additional_notes.replace("\n", " "),
+            '#EAN:;': '#EAN:;' + self.ui.lineEdit_ean_upc.text()
         }
 
         with open(self.output_file_path, 'r') as f:
