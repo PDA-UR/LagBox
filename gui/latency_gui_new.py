@@ -4,7 +4,7 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QIcon, QPixmap, QIcon
 from PyQt5.QtWidgets import QApplication, qApp
-from PyQt5.QtCore import QTimer, Qt, QEvent
+from PyQt5.QtCore import QTimer, Qt, QEvent, pyqtSignal, pyqtSlot, QThread
 
 import sys
 from subprocess import Popen, PIPE, STDOUT
@@ -200,11 +200,58 @@ class LatencyGUI(QtWidgets.QWizard):
             self.ui.setButtonText(QtWidgets.QWizard.NextButton, Constants.BUTTON_NEXT_DEFAULT_NAME)
             self.button(QtWidgets.QWizard.NextButton).hide()
 
-            # Measurement can only start after UI has loaded completely
-            timer_start_measurement = QTimer(self)
-            timer_start_measurement.setSingleShot(True)
-            timer_start_measurement.timeout.connect(self.start_measurement)
-            timer_start_measurement.start(100)
+            command = '../bin/inputLatencyMeasureTool' + \
+                      ' -m ' + str(Constants.MODE) + \
+                      ' -tmin 100 -tmax 10000' + \
+                      ' -b ' + str(self.button_code) + \
+                      ' -d ' + str(self.device_type) + \
+                      ' -event ' + str(self.device_id).replace('event', '') + \
+                      ' -n ' + str(Constants.NUM_TEST_ITERATIONS) + \
+                      " -name '" + self.device_name + "'"
+
+            thread = LagBoxMeasurement(command)
+            thread.start()
+            thread.finished.connect(self.thread_finished)
+            thread.display_progress.connect(self.display_progress)
+            #thread.measurement_completed.connect(self.on_measurement_completed)
+            thread.logpath_arrived.connect(self.on_logpath_arrived)
+
+    @pyqtSlot('QString', 'QString')
+    def display_progress(self, line_id, line):
+        self.ui.label_press_button_again.setText('')
+        self.ui.progressBar.setValue((int(line_id) / Constants.NUM_TEST_ITERATIONS) * 100)
+        self.ui.label_progress.setText(str(line_id) + '/' + str(Constants.NUM_TEST_ITERATIONS))
+        measured_time = float(line.split(',')[2].replace("\\n'", ''))
+        self.ui.label_last_measured_time.setText(
+            str(round(measured_time, Constants.NUM_DISPLAYED_DECIMAL_PLACES)) + 'ms')
+
+        if int(line_id) == Constants.NUM_TEST_ITERATIONS:
+            self.ui.label_press_button_again.setText('Measurement finished. Analysing and saving data...')
+
+    def thread_finished(self):
+        print('Thread finished')
+
+    # def on_measurement_completed(self):
+    #     print('Finished successful')
+    #     self.ui.label_press_button_again.setText('Measurement finished. Analysing and saving data...')
+
+    @pyqtSlot('QString')
+    def on_logpath_arrived(self, line):
+        print('Logpath arrived')
+        self.output_file_path = str(line).replace("b'", '').replace("\\n'", '')
+
+        # TODO: Verify here if measurement was successful
+        self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
+
+        self.create_data_plot()
+
+        # The plot creation takes a moment on a Raspberry Pi. We start it with a QTimer to leave time for the UI
+        # to update
+        # timer_create_data_plot = QTimer(self)
+        # timer_create_data_plot.setSingleShot(True)
+        # timer_create_data_plot.timeout.connect(self.create_data_plot)
+        # timer_create_data_plot.start(100)
+
 
     # User interface for page four (Page that displays the results of the lagbox measurement)
     def init_ui_page_four(self):
@@ -581,67 +628,46 @@ class LatencyGUI(QtWidgets.QWizard):
         except PermissionError as error:
             print(error)  # TODO: Check if this error can happen on a Raspberry Pi
 
+    def create_data_plot(self):
+        self.dataplotter = DataPlotter.DataPlotter()
+        self.stats = self.dataplotter.process_filedata(self.output_file_path)
+        self.init_ui_page_four()
+        self.ui.next()
+
+
+class LagBoxMeasurement(QThread):
+
+    display_progress = pyqtSignal('QString', 'QString')
+    #measurement_completed = pyqtSignal()
+    logpath_arrived = pyqtSignal('QString')
+    command = ''
+
+    def __init__(self, command):
+        super().__init__()
+        self.command = command
+
     # https://www.saltycrane.com/blog/2008/09/how-get-stdout-and-stderr-using-python-subprocess-module/
-    def start_measurement(self):
-        print('Start Measurement')
+    def run(self):
+        print(self.command)
 
-        command = '../bin/inputLatencyMeasureTool' + \
-                  ' -m ' + str(Constants.MODE) + \
-                  ' -tmin 100 -tmax 10000' + \
-                  ' -b ' + str(self.button_code) + \
-                  ' -d ' + str(self.device_type) + \
-                  ' -event ' + str(self.device_id).replace('event', '') + \
-                  ' -n ' + str(Constants.NUM_TEST_ITERATIONS) + \
-                  " -name '" + self.device_name + "'"
-
-        print(command)
-
-        process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
-
-        # TODO: If the user has selected the wrong button, the UI will freeze.
-        # Therefore the measurement needs to be cancelled after a certain amount of time
+        process = Popen(self.command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
 
         for line in iter(process.stdout.readline, ''):
             print(line)
             line_id = str(line).split(',')[0].replace("b'", '')  # Convert line to String and remove the leading "b'"
             if line_id.isdigit():  # Only count the progress if the line is actually the result of a measurement
-                self.display_progress(line_id, str(line))
-
+                self.display_progress.emit(line_id, str(line))
             if 'done' in str(line):
-                print('Finished successful')
-                self.ui.label_press_button_again.setText('Measurement finished. Analysing and saving data...')
+                #self.measurement_completed.emit()
                 break
             elif 'cancelled' in str(line):
                 sys.exit('Measurement failed')
             # At the end of the measurement, the filename and path of the created .csv file is returned.
             # We save that path
             elif '/log/' in str(line):
-                self.output_file_path = str(line).replace("b'", '').replace("\\n'", '')
+                self.logpath_arrived.emit(str(line))
             elif len(line) is 0:
                 sys.exit('Found an empty line in stdout. This should not happen')
-
-        # The plot creation takes a moment on a Raspberry Pi. We start it with a QTimer to leave time for the UI
-        # to update
-        timer_create_data_plot = QTimer(self)
-        timer_create_data_plot.setSingleShot(True)
-        timer_create_data_plot.timeout.connect(self.create_data_plot)
-        timer_create_data_plot.start(100)
-
-        # TODO: Verify here if measurement was successful
-        self.ui.button(QtWidgets.QWizard.NextButton).setEnabled(True)
-
-    def display_progress(self, line_id, line):
-        self.ui.label_press_button_again.setText('')
-        self.ui.progressBar.setValue((int(line_id) / Constants.NUM_TEST_ITERATIONS) * 100)
-        self.ui.label_progress.setText(str(line_id) + '/' + str(Constants.NUM_TEST_ITERATIONS))
-        measured_time = float(line.split(',')[2].replace("\\n'", ''))
-        self.ui.label_last_measured_time.setText(str(round(measured_time, Constants.NUM_DISPLAYED_DECIMAL_PLACES)) + 'ms')
-
-    def create_data_plot(self):
-        self.dataplotter = DataPlotter.DataPlotter()
-        self.stats = self.dataplotter.process_filedata(self.output_file_path)
-        self.init_ui_page_four()
-        self.ui.next()
 
 
 # An object representation of all relevant data about connected USB device
