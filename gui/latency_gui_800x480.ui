@@ -829,7 +829,7 @@ just press &quot;Exit application without uploading results&quot;.</string>
      </font>
     </property>
     <property name="text">
-     <string>Here your can upload latency measurements captured using LagBox. 
+     <string>Here you can upload latency measurements captured using LagBox. 
 The measurements will be automatically analyzed and put online. By uploading a file you agree to the following conditions (we want to make the data as useful as possible):</string>
     </property>
     <property name="wordWrap">
@@ -1034,7 +1034,7 @@ If you want your name(s) to appear on the results page, please check the checkbo
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>130</y>
+      <y>135</y>
       <width>641</width>
       <height>22</height>
      </rect>
