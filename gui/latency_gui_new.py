@@ -33,7 +33,6 @@ class Constants:
     # (0 = stepper mode, 1 = stepper latency test mode, 2 = stepper reset mode,
     # 3 = auto mode, 4 = pressure sensor test mode)
     MODE = 3
-
     NUM_TEST_ITERATIONS = 100
     NUM_DISPLAYED_DECIMAL_PLACES = 1  # Number of decimal places displayed of the current measurement in ms
 
@@ -213,7 +212,6 @@ class LatencyGUI(QtWidgets.QWizard):
             thread.start()
             thread.finished.connect(self.thread_finished)
             thread.display_progress.connect(self.display_progress)
-            #thread.measurement_completed.connect(self.on_measurement_completed)
             thread.logpath_arrived.connect(self.on_logpath_arrived)
 
     @pyqtSlot('QString', 'QString')
@@ -231,10 +229,6 @@ class LatencyGUI(QtWidgets.QWizard):
     def thread_finished(self):
         print('Thread finished')
 
-    # def on_measurement_completed(self):
-    #     print('Finished successful')
-    #     self.ui.label_press_button_again.setText('Measurement finished. Analysing and saving data...')
-
     @pyqtSlot('QString')
     def on_logpath_arrived(self, line):
         print('Logpath arrived')
@@ -245,22 +239,12 @@ class LatencyGUI(QtWidgets.QWizard):
 
         self.create_data_plot()
 
-        # The plot creation takes a moment on a Raspberry Pi. We start it with a QTimer to leave time for the UI
-        # to update
-        # timer_create_data_plot = QTimer(self)
-        # timer_create_data_plot.setSingleShot(True)
-        # timer_create_data_plot.timeout.connect(self.create_data_plot)
-        # timer_create_data_plot.start(100)
-
-
     # User interface for page four (Page that displays the results of the lagbox measurement)
     def init_ui_page_four(self):
-        # self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_three)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_five)
 
         # Path where the log will be saved
         self.ui.label_path_name.setText(os.path.dirname(os.path.realpath(__file__)).replace('gui', 'log'))
-
         self.ui.label_statistics.setText(self.stats)
 
         try:
@@ -392,7 +376,7 @@ class LatencyGUI(QtWidgets.QWizard):
         else:
             self.ui.comboBox_device_type.addItems(Constants.DEVICE_TYPES)
 
-    # Initialize the combobox with a list of deviced handed over
+    # Initialize the combobox with a list of devices handed over
     def init_combobox_device(self, devices):
         self.ui.comboBox_device.clear()
         self.ui.comboBox_device.addItems(devices)
@@ -427,7 +411,7 @@ class LatencyGUI(QtWidgets.QWizard):
 
     def validate_inputs(self):
         self.device_name = self.ui.lineEdit_device_name.text()
-        # TODO: Remove all non-allowed chars from device name and set a maximum length for the string
+        # TODO: Remove all non-allowed chars from device name
         self.device_type = Constants.DEVICE_TYPE_IDS[str(self.ui.comboBox_device_type.currentText()).replace(' (auto-detected)', '')]
 
         if len(self.device_name) > Constants.TEXT_INPUT_MAX_CHARS:
@@ -511,7 +495,7 @@ class LatencyGUI(QtWidgets.QWizard):
         # https://stackoverflow.com/questions/14471049/python-2-7-1-how-to-open-edit-and-close-a-csv-file
 
         new_rows = []  # a holder for our modified rows when we make them
-        changes = {  # a dictionary of changes to make, find 'key' substitue with 'value'
+        changes = {  # a dictionary of changes to make
             '#author:;': '#author:;' + self.authors,
             '#vendorId:;': '#vendorId:;' + self.vendor_id,
             '#productId:;': '#productId:;' + self.product_id,
@@ -638,7 +622,6 @@ class LatencyGUI(QtWidgets.QWizard):
 class LagBoxMeasurement(QThread):
 
     display_progress = pyqtSignal('QString', 'QString')
-    #measurement_completed = pyqtSignal()
     logpath_arrived = pyqtSignal('QString')
     command = ''
 
@@ -658,7 +641,6 @@ class LagBoxMeasurement(QThread):
             if line_id.isdigit():  # Only count the progress if the line is actually the result of a measurement
                 self.display_progress.emit(line_id, str(line))
             if 'done' in str(line):
-                #self.measurement_completed.emit()
                 break
             elif 'cancelled' in str(line):
                 sys.exit('Measurement failed')
