@@ -559,6 +559,10 @@ class LatencyGUI(QtWidgets.QWizard):
                 device_id = self.get_device_id(device[5])
                 device_type_auto_detected = self.get_device_type(device[5])
 
+                # The fourth row of the device info (device[3]) contains the device id needed to request info about the
+                # devices speed
+                device_speed = self.get_device_speed(device[3])
+
                 device_already_in_list = False
                 for existing_device in self.device_objects:
                     if existing_device.name == name:
@@ -571,6 +575,19 @@ class LatencyGUI(QtWidgets.QWizard):
                     self.device_objects.append(Device(vendor_id, product_id, name, device_id, device_type_auto_detected))
 
         self.init_combobox_device(device_names)
+
+    def get_device_speed(self, device_data):
+        device_information = device_data.split('/')[1:6]
+        command = 'cat /sys/' + device_information[0] + '/' + device_information[1] + '/' + device_information[2] + '/' + device_information[3] + '/' + device_information[4] + '/speed'
+        print(command)
+
+        process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+        device_speed = process.stdout.readline().decode("utf-8") + 'M'
+        device_speed = device_speed.replace("\n", " ").replace(' ', '')
+        print('Speed: ' + device_speed)
+
+        return device_speed
+
 
     # Extract the ID of the device (eventXX) from the device details by searching for the corresponding keyword
     def get_device_id(self, line):
