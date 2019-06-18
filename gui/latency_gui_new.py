@@ -54,6 +54,7 @@ class LatencyGUI(QtWidgets.QWizard):
     vendor_id = ''  # Vendor ID of the device
     product_id = ''  # Product ID of the device
     ean_upc = ''  # EAN (European Article Number) / UPC (Universal Product code)
+    device_speed = ''
 
     output_file_path = ''  # File path and name of the created .csv file
     stats = ''  # Stats about the data of the current measurement (Mean, Median, Min, Max, Standard Deviation)
@@ -148,6 +149,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.device_name = ''
         self.vendor_id = ''
         self.product_id = ''
+        self.device_speed =''
 
         self.output_file_path = ''
         self.stats = ''
@@ -394,6 +396,7 @@ class LatencyGUI(QtWidgets.QWizard):
                 self.init_combobox_device_type(device.device_type)
                 self.vendor_id = device.vendor_id
                 self.product_id = device.product_id
+                self.device_speed = device.device_speed
 
                 break  # No need to continue after correct device is found
 
@@ -506,6 +509,7 @@ class LatencyGUI(QtWidgets.QWizard):
             '#public:;': '#public:;' + str(self.publish_names),
             '#notes:;': '#notes:;' + self.additional_notes.replace("\n", " "),
             '#EAN:;': '#EAN:;' + self.ui.lineEdit_ean_upc.text()
+            # '#deviceSpeed:;': '#deviceSpeed:;' + self.device_speed
         }
 
         with open(self.output_file_path, 'r') as f:
@@ -572,13 +576,16 @@ class LatencyGUI(QtWidgets.QWizard):
                 # Verify that there is no difference between two entries
                 if not device_already_in_list:
                     device_names.append(name)
-                    self.device_objects.append(Device(vendor_id, product_id, name, device_id, device_type_auto_detected))
+                    self.device_objects.append(Device(vendor_id, product_id, name, device_id, device_type_auto_detected,
+                                                      device_speed))
 
         self.init_combobox_device(device_names)
 
+    # Request the device speed of the current USB device
     def get_device_speed(self, device_data):
         device_information = device_data.split('/')[1:6]
-        command = 'cat /sys/' + device_information[0] + '/' + device_information[1] + '/' + device_information[2] + '/' + device_information[3] + '/' + device_information[4] + '/speed'
+        command = 'cat /sys/' + device_information[0] + '/' + device_information[1] + '/' + \
+                  device_information[2] + '/' + device_information[3] + '/' + device_information[4] + '/speed'
         print(command)
 
         process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
@@ -672,12 +679,13 @@ class LagBoxMeasurement(QThread):
 # An object representation of all relevant data about connected USB device
 class Device:
 
-    def __init__(self, vendor_id, product_id, name, device_id, device_type):
+    def __init__(self, vendor_id, product_id, name, device_id, device_type, device_speed):
         self.vendor_id = vendor_id
         self.product_id = product_id
         self.name = name
         self.device_id = device_id
         self.device_type = device_type
+        self.device_speed = device_speed
 
 
 def main():
