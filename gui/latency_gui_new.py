@@ -82,7 +82,7 @@ class LatencyGUI(QtWidgets.QWizard):
     def init_ui(self):
         self.ui = uic.loadUi(Constants.UI_FILE, self)
         self.setWindowTitle(Constants.WINDOW_TITLE)
-        self.showFullScreen()
+        #self.showFullScreen()
 
         # Set an eventFilter on the entire application to catch key inputs
         qApp.installEventFilter(self)
