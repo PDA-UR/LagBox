@@ -3,8 +3,6 @@
 #include <time.h>
 
 FILE *logFile_automode;
-FILE *logFile_stepper;
-FILE *logFile_pressure;
 
 int getPollingRate()
 {
@@ -17,7 +15,7 @@ int getPollingRate()
    	
    	fclose(cmdlinetxt);
 
-   	printf("mousepoll: %d\n", pollingRate);
+   	//printf("mousepoll: %d\n", pollingRate);
    	
    	return(pollingRate);
 }
@@ -48,6 +46,7 @@ void writeFileHeader(FILE *file, struct TestParams params)
     fprintf(file, "#email:;\n");
     fprintf(file, "#public:;\n");
     fprintf(file, "#notes:;\n");
+    fprintf(file, "#EAN:;\n");
 }
 
 void replaceForbiddenChars(char *newString, char * pszFileName)
@@ -69,62 +68,6 @@ void replaceForbiddenChars(char *newString, char * pszFileName)
 			}
 		} while (pos != NULL);
 	}
-}
-
-void logPressureData(struct TestParams params, struct PressureData *data, unsigned int length)
-{
-	char filteredName[256];
-
-	replaceForbiddenChars(filteredName, params.device);
-
-	FILE *logFile = openLogFile(filteredName, STR_PRESSURE);
-
-	fprintf(logFile, "#Mode:;%d\n", params.mode);
-	fprintf(logFile, "#Device:;%s\n", filteredName);
-	fprintf(logFile, "#Button:;%d\n", params.buttonCode);
-	fprintf(logFile, "#iterations:;%d\n", params.iterations);
-	fprintf(logFile, "#waitTime:;%d\n", params.waitTime);
-
-	fprintf(logFile, "\n");
-	fprintf(logFile, "counter;timestamp;pressure\n");
-
-	for(int i = 0; i < length; i++)
-	{
-		if(data[i].timestamp == 0) break;
-		fprintf(logFile, "%d;%lld;%d\n", i, data[i].timestamp, data[i].pressure);
-	}
-
-	closeLogFile(logFile);
-}
-
-void logStepperLatencyData(struct TestParams params, long long* result, unsigned int length)
-{
-	// TODO
-}
-
-void logStepperModeData(struct TestParams params, struct StepperModeResult *data, unsigned int length)
-{
-	char filteredName[256];
-
-	replaceForbiddenChars(filteredName, params.device);
-
-	FILE *logFile = openLogFile(filteredName, STR_STEPPERMODE);
-
-	fprintf(logFile, "#Mode:;%d\n", params.mode);
-	fprintf(logFile, "#Device:;%s\n", filteredName);
-	fprintf(logFile, "#Button:;%d\n", params.buttonCode);
-	fprintf(logFile, "#iterations:;%d\n", params.iterations);
-	fprintf(logFile, "#waitTime:;%d\n", params.waitTime);
-
-	fprintf(logFile, "\n");
-	fprintf(logFile, "steps;startTime;endTime;usbTime\n");
-
-	for(int i = 0; i < length; i++)
-	{
-		fprintf(logFile, "%d;%lld;%lld;%lld\n", data[i].stepsMoved, data[i].startTime, data[i].endTime, data[i].usbTime);
-	}
-
-	closeLogFile(logFile);
 }
 
 void logAutoModeData(struct TestParams params, struct AutoModeData *data, unsigned int length)
@@ -181,6 +124,8 @@ FILE *openLogFile(char *pszFileName, char *mode)
 		logfileNumber++;
 		sprintf(path, "../log/%s_%s_%dms_%d.csv", mode, filteredName, pollingRate, logfileNumber);
 	}
+
+    printf("%s\n", path);
 
 	logFile = fopen(path, "w+");
 	if (logFile == NULL)
