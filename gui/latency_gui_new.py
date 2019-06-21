@@ -33,7 +33,7 @@ class Constants:
     # (0 = stepper mode, 1 = stepper latency test mode, 2 = stepper reset mode,
     # 3 = auto mode, 4 = pressure sensor test mode)
     MODE = 3
-    NUM_TEST_ITERATIONS = 100
+    NUM_TEST_ITERATIONS = 1000
     NUM_DISPLAYED_DECIMAL_PLACES = 1  # Number of decimal places displayed of the current measurement in ms
 
     # URL to the server where .csv files of measurement data should get uploaded
