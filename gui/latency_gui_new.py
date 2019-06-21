@@ -83,7 +83,7 @@ class LatencyGUI(QtWidgets.QWizard):
     def init_ui(self):
         self.ui = uic.loadUi(Constants.UI_FILE, self)
         self.setWindowTitle(Constants.WINDOW_TITLE)
-        #self.showFullScreen()
+        #self.showFullScreen()  # Disabled because UI does not scale properly on large screens
 
         # Set an eventFilter on the entire application to catch key inputs
         qApp.installEventFilter(self)
@@ -149,7 +149,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.device_name = ''
         self.vendor_id = ''
         self.product_id = ''
-        self.device_speed =''
+        self.device_speed = ''
 
         self.output_file_path = ''
         self.stats = ''
@@ -255,6 +255,9 @@ class LatencyGUI(QtWidgets.QWizard):
         except Exception as e:
             print('PLOT IMAGE NOT AVAILABLE!', e)
 
+        # Save additional Metadata to csv log
+        self.save_additional_information_to_csv(False)
+
     # User interface for page five (Page that askes the user if he wants to upload the measurements)
     def init_ui_page_five(self):
         self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Continue to Upload Results')
@@ -318,7 +321,7 @@ class LatencyGUI(QtWidgets.QWizard):
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_two)
 
     def on_page_seven_next_button_pressed(self):
-        self.save_additional_information_to_csv()
+        self.save_additional_information_to_csv(True)
 
         if self.ui.checkBox_save_name_email_locally.isChecked():
             self.save_name_email_locally()
@@ -475,42 +478,43 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # if a user chooses to share and upload his/her measurement results, additional data like the users name and
     # email-adress will be saved to the csv file
-    def save_additional_information_to_csv(self):
+    def save_additional_information_to_csv(self, include_personal_information):
         print('Saving additional information to CSV')
         print('Path of csv file:', self.output_file_path)
 
-        self.authors = self.ui.lineEdit_authors.text()
-        self.publish_names = self.ui.checkBox_allow_name_publishing.isChecked()
-        self.email = self.ui.lineEdit_email.text()
-        self.additional_notes = self.ui.plainTextEdit_additional_notes.toPlainText()
+        if include_personal_information:
+            self.authors = self.ui.lineEdit_authors.text()
+            self.publish_names = self.ui.checkBox_allow_name_publishing.isChecked()
+            self.email = self.ui.lineEdit_email.text()
+            self.additional_notes = self.ui.plainTextEdit_additional_notes.toPlainText()
 
-        if len(self.authors) > Constants.TEXT_INPUT_MAX_CHARS:
-            self.authors = self.authors[:Constants.TEXT_INPUT_MAX_CHARS]
-        if len(self.email) > Constants.TEXT_INPUT_MAX_CHARS:
-            self.email = self.email[:Constants.TEXT_INPUT_MAX_CHARS]
-
-        print("Authors: ", self.authors)
-        print('Publish names:', self.publish_names)
-        print('Email:', self.email)
-        print('Notes:', self.additional_notes)
+            if len(self.authors) > Constants.TEXT_INPUT_MAX_CHARS:
+                self.authors = self.authors[:Constants.TEXT_INPUT_MAX_CHARS]
+            if len(self.email) > Constants.TEXT_INPUT_MAX_CHARS:
+                self.email = self.email[:Constants.TEXT_INPUT_MAX_CHARS]
 
         # Update data in existing csv file:
         # https://stackoverflow.com/questions/14471049/python-2-7-1-how-to-open-edit-and-close-a-csv-file
 
+        if include_personal_information:
+            changes = {  # a dictionary of changes to make
+                '#author:;': '#author:;' + self.authors,
+                '#email:;': '#email:;' + self.email,
+                '#public:;': '#public:;' + str(self.publish_names),
+                '#notes:;': '#notes:;' + self.additional_notes.replace("\n", " ")
+            }
+        else:
+            changes = {  # a dictionary of changes to make
+                '#vendorId:;': '#vendorId:;' + self.vendor_id,
+                '#productId:;': '#productId:;' + self.product_id,
+                '#date:;': '#date:;' + datetime.today().strftime('%d-%m-%Y'),
+                '#bInterval:;': '#bInterval:;' + str(self.get_device_bInterval()),
+                '#deviceType:;': '#deviceType:;' + str(self.device_type),
+                '#EAN:;': '#EAN:;' + self.ui.lineEdit_ean_upc.text()
+                # '#deviceSpeed:;': '#deviceSpeed:;' + self.device_speed
+            }
+
         new_rows = []  # a holder for our modified rows when we make them
-        changes = {  # a dictionary of changes to make
-            '#author:;': '#author:;' + self.authors,
-            '#vendorId:;': '#vendorId:;' + self.vendor_id,
-            '#productId:;': '#productId:;' + self.product_id,
-            '#date:;': '#date:;' + datetime.today().strftime('%d-%m-%Y'),
-            '#bInterval:;': '#bInterval:;' + str(self.get_device_bInterval()),
-            '#deviceType:;': '#deviceType:;' + str(self.device_type),
-            '#email:;': '#email:;' + self.email,
-            '#public:;': '#public:;' + str(self.publish_names),
-            '#notes:;': '#notes:;' + self.additional_notes.replace("\n", " "),
-            '#EAN:;': '#EAN:;' + self.ui.lineEdit_ean_upc.text()
-            # '#deviceSpeed:;': '#deviceSpeed:;' + self.device_speed
-        }
 
         with open(self.output_file_path, 'r') as f:
             reader = csv.reader(f)  # pass the file to our csv reader
@@ -525,7 +529,10 @@ class LatencyGUI(QtWidgets.QWizard):
             writer = csv.writer(f)
             writer.writerows(new_rows)
 
-        self.upload_measurement()
+        # Only upload if function is called by the specific UI Page
+        if include_personal_information:
+            print('Ready to upload measurement')
+            self.upload_measurement()
 
     # Upload the newly created .csv file of the latest measurement
     def upload_measurement(self):
