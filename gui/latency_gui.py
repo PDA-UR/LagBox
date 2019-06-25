@@ -580,7 +580,7 @@ class LatencyGUI(QtWidgets.QWizard):
                         device_already_in_list = True
 
                 # TODO: under cat /proc/bus/input/devices, a device sometimes appears multiple times.
-                # Verify that there is no difference between two entries
+                # Select and display only the correct device
                 if not device_already_in_list:
                     device_names.append(name)
                     self.device_objects.append(Device(vendor_id, product_id, name, device_id, device_type_auto_detected,
@@ -641,7 +641,7 @@ class LatencyGUI(QtWidgets.QWizard):
                             return
 
         except PermissionError as error:
-            print(error)  # TODO: Check if this error can happen on a Raspberry Pi
+            print(error)
 
     def create_data_plot(self):
         self.dataplotter = DataPlotter.DataPlotter()
