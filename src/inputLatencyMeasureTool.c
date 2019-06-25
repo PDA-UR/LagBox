@@ -39,8 +39,7 @@
 // Project includes
 #include "inputLatencyMeasureTool.h"
 #include "joystickControl.h"
-#include "wiringPi/wiringPi.h"
-#include "stepper.h"
+#include <wiringPi.h>
 #include "fileLog.h"
 
 enum INPUT_DEVICES inputDevice;
@@ -70,12 +69,6 @@ int *delayList;
 
 int selectedDevice = 0;
 
-int sm_steps = 1;
-int sm_totalStepsUp = 0;
-int sm_totalStepsDown = 0;
-
-int sm_RPM = 960;
-
 long long getCurTime_microseconds(int clk_id)
 {
 	struct timeval gettime_now;
@@ -93,36 +86,6 @@ long long timevalToMicroSeconds(struct timeval *tv)
 {
 	return (long long) tv->tv_sec * 1000000l + (long long)tv->tv_usec;
 }
-
-
-/*
-Sets up the wiringPi spi functions based on http://shaunsbennett.com/piblog/?p=266
-*/
-void setupSPI(int spiChannel)
-{
-	if ((g_iSPIFileDescriptor = wiringPiSPISetup(spiChannel, 1000000)) < 0)
-	{
-		fprintf(stderr, "Can't open the SPI bus: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-}
-
-/*
- * Method:    Function for reading analog values from the adc via spi based on http://shaunsbennett.com/piblog/?p=266
- * Returns:   int Returns value between 0 and 1023 or -1 if unavailable analog channel was selected
- * Parameter: int channelConfig can be CHAN_CONFIG_SINGLE for single-ended or CHAN_CONFIG_DIFF for differential input
- * Parameter: int analogChannel can be a value between 0 and 7
- */
-int readADC(int channelConfig, int analogChannel)
-{
-	if (analogChannel < 0 || analogChannel > 7)
-		return -1;
-	unsigned char buffer[3] = { 1 }; // start bit
-	buffer[1] = (channelConfig + analogChannel) << 4;
-	wiringPiSPIDataRW(SPI_CHANNEL, buffer, 3);
-	return ((buffer[1] & 3) << 8) + buffer[2]; // get last 10 bits
-}
-
 
 void autoMode(struct AutoModeData *results, unsigned int iterations)
 {
@@ -147,7 +110,7 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 		debug("pin clear\n");
 
         // maybe this helps to automatically start the measurement?
-        usleep(500000);
+        //usleep(500000);
 
 		// make sure we aren't synced
 		usleep(delayList[i]);
@@ -175,13 +138,6 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 				break;
 			}
 
-            // if there is no event within one second, cancel
-            //if(getCurTime_microseconds(CLOCK_REALTIME) - dStartTime > 1000000)
-            //{
-            //    printf("cancelled");
-            //    return;
-            //}
-
 			// maybe not ideal
 			usleep(10);
 		}
@@ -192,7 +148,6 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 		usleep(10);
 	}
 
-	printf("done");
 	digitalWrite(PIN_AUTO_MODE, LOW);
 }
 
@@ -313,37 +268,6 @@ void setupPins()
 	digitalWrite(PIN_AUTO_MODE, LOW);
 }
 
-void testStepper()
-{
-	// stepper stuff
-	debug("this is the new shit!\n");
-	debug("init stepper...\n");
-	initializeStepper(200, 1, 4);
-	debug("set rpm...\n");
-
-	// 1200 skips steps
-	// 960 is still ok
-	setStepperRPM(960);
-
-	debug("loop...\n");
-	for(int i = 0; i < 100; i++)
-	{
-		debug("->\n");
-		//moveStepper(200);
-		rotateStepper(2400);
-		//moveDistance(20.0f);
-		usleep(100000);
-		debug("<-\n");
-		//moveStepper(-200);
-		rotateStepper(-2400);
-		//moveDistance(-20.0f);
-		usleep(100000);
-	}
-
-
-	return;
-}
-
 // swap array elements
 void swap(int list[], int a, int b)
 {
@@ -372,147 +296,6 @@ void createDelayList(int min, int max, int length)
 	fisherYatesShuffle(length, delayList);
 }
 
-/*
- * ### WIP ###
- * move the stepper to the starting position and get the number of steps needed to press a button:
- * 1. slowly move down 'sm_steps' steps until a button press has been recognized
- * 2. move up until a button release has been recognized and count the steps needed (sm_totalSteps)
- */
-void calibrateStepper()
-{
-	debug("calibrate stepper...\n");
-
-	rotateStepper(200);
-
-	const int CALIBRATION_COUNT = 10;
-	int totalStepsUp = 0;
-	int totalStepsDown = 0;
-	int sumTotalStepsUp = 0; // sum of all steps in calibration
-	int sumTotalStepsDown = 0;
-
-
-	// move stepper to a reasonable position
-	// move down fast until button is pressed
-	while(1)
-	{
-		moveStepper(-sm_steps);
-
-		if(isButtonPressed(NULL) == 1)
-		{
-			break;
-		}
-	}
-
-	// move up fast until button is released
-	while(1)
-	{
-		moveStepper(sm_steps);
-		usleep(200000);
-
-		if(isButtonReleased(NULL) == 1)
-		{
-			break;
-		}
-	}
-
-	// start actual calibration
-	for(int i = 0; i < CALIBRATION_COUNT; i++)
-	{
-		totalStepsDown = 0; // total steps to press/release a button
-		totalStepsUp = 0;
-
-		// move down step by step until button is pressed and count steps
-		while(1)
-		{
-			moveStepper(-sm_steps);
-			totalStepsDown += sm_steps;
-
-			usleep(100000);
-
-			if(isButtonPressed(NULL) == 1)
-			{
-				break;
-			}
-
-			
-		}
-
-		debug("totalSteps down: %d\n", totalStepsDown);
-		sumTotalStepsDown += totalStepsDown;
-
-		usleep(10000);
-
-		// move up step by step until button is released and count steps
-		while(1)
-		{
-			moveStepper(sm_steps);
-			totalStepsUp += sm_steps;
-
-			usleep(100000);
-
-			if(isButtonReleased(NULL) == 1)
-			{
-				break;
-			}
-
-		}
-
-		debug("totalSteps up: %d\n", totalStepsUp);
-		sumTotalStepsUp += totalStepsUp;
-
-		usleep(10000);
-	}
-
-	// divide sumTotalSteps by two, as we added press and release steps,
-	// then divide it by the number of calibration iterations to get an average
-	// and finally convert it to int as we can only move by whole steps
-	sm_totalStepsDown = (int) ceil(sumTotalStepsDown / CALIBRATION_COUNT);
-	sm_totalStepsUp = (int) ceil(sumTotalStepsUp / CALIBRATION_COUNT);
-
-	debug("final totalSteps - down: %d, up: %d\n", sm_totalStepsDown, sm_totalStepsUp);
-	
-	return;
-}
-
-/*
- * measure the time the stepper needs to move a certain amount of steps
- * steps: number of steps to move
- * iterations: number of times to test
- * waitTime: delay time between tests in microseconds
- * result: array containing all measured time differences in microseconds
- */
-void measureStepperLatency(int steps, int iterations, int waitTime, long long* result)
-{
-	debug("measureStepperLatency()\n");
-
-	long long startTime;
-	long long endTime;
-	long long diff;
-
-	if(steps == 0)
-	{
-		debug("steps too low (%d) - cancelling test\n", steps);
-		return;
-	}
-
-	for(int i = 0; i < iterations; i++)
-	{
-		startTime = getCurTime_microseconds(CLOCK_REALTIME);
-		moveStepper(-steps);
-		endTime = getCurTime_microseconds(CLOCK_REALTIME);
-		diff = endTime - startTime;
-
-		result[i] = diff;
-
-		usleep(waitTime);
-		moveStepper(steps);
-
-		usleep(waitTime);
-	}
-
-	debug("measureStepperLatency() - done\n");
-}
-
 int clearInputEvents()
 {
 	int lastState = -1;
@@ -530,132 +313,6 @@ int clearInputEvents()
 	}
 
 	return lastState;
-}
-
-/*
- * ### WIP ###
- * conducts the actual latency test
- * iterations: number of times to test
- * waitTime: delay time between tests in microseconds
- * result1: array containing all measured latencies from when the stepper started moving until it stopped moving
- * result2: array containing all measured latencies from when the stepper stopped moving until the usb event - ideally, these are our latencies
- */
-void stepperMode(int iterations, int waitTime, struct StepperModeResult* result)
-{
-	debug("stepperMode()\n");
-
-	long long startTime; // time before stepper starts moving
-	long long movedTime; // time after stepper has moved
-	long long endTime; // time of usb event
-	long long diff1; // time it took the stepper to move
-	long long diff2; // remaining time to the usb event
-	long long diff3;
-
-	int buttonState = -1;
-
-	int stepsMoved = 0;
-
-	int lastState = -1;
-
-	long long *usbTime = (long long*) malloc(sizeof(long long));
-
-	sm_totalStepsUp *= 2;
-	sm_totalStepsDown *= 2;
-
-	if(sm_totalStepsDown == 0 || sm_totalStepsUp == 0)
-	{
-		debug("totalSteps too low (down: %d, up: %d) - aborting test\n", sm_totalStepsDown, sm_totalStepsUp);
-		return;
-	}
-
-	for(int i = 0; i < iterations; i++)
-	{
-		debug("iteration %d/%d\n", i + 1, iterations);
-
-		lastState = clearInputEvents();
-
-		while(lastState == 1)
-		{
-			debug("repositioning...\n");
-			moveStepper(1);
-			usleep(100000);
-			
-			if(checkButtonState(NULL) == 0) lastState = 0;
-			else continue;
-		}
-
-		printf("d %d, u %d\n", sm_totalStepsDown, sm_totalStepsUp);
-
-		stepsMoved = sm_totalStepsDown;
-		startTime = getCurTime_microseconds(CLOCK_REALTIME);
-		moveStepperAsync(-sm_totalStepsDown);
-		movedTime = getCurTime_microseconds(CLOCK_REALTIME);
-		while(1)
-		{
-			buttonState = checkButtonState(usbTime);
-			if(buttonState == -1)
-			{
-				continue;
-			}
-			else if(buttonState == 0)
-			{
-				debug("!!! released (expecting pressed)\n");
-				break;
-			}
-			else if(buttonState == 1)
-			{
-				endTime = getCurTime_microseconds(CLOCK_REALTIME);
-				diff1 = movedTime - startTime;
-				diff2 = endTime - movedTime;
-				diff3 = *usbTime - startTime;
-
-				struct StepperModeResult tempResult;
-				tempResult.stepsMoved = stepsMoved;
-				tempResult.startTime = startTime;
-				tempResult.usbTime = *usbTime;
-				tempResult.endTime = endTime;
-				result[i] = tempResult;
-
-				debug("moved: %lld, end: %lld, usb: %lld\n", diff1, diff2, diff3);
-				break;
-			}
-		}
-		usleep(waitTime);
-		
-		while(isButtonReleased(NULL) == 0)
-		{
-			moveStepper(sm_totalStepsUp);
-			usleep(100000);
-		}
-		usleep(waitTime);
-	}
-
-	free(usbTime);
-
-	debug("stepperMode() - done\n");
-}
-
-pthread_t startPressureMeasurement(struct PressureData* pressureData)
-{
-	pthread_t tid;
-	
-	pthread_create(&tid, NULL, pressureSensorThread, pressureData);
-
-	return tid;
-}
-
-void* pressureSensorThread(void* args)
-{
-	struct PressureData* pressureData = (struct PressureData*)args;
-
-	for(uint32_t i = 0; i < 1000000; i++)
-	{
-		struct PressureData p;
-		p.timestamp = getCurTime_microseconds(CLOCK_REALTIME);
-		p.pressure = readADC(CHAN_CONFIG_SINGLE, CHANNEL_FSR);
-		pressureData[i] = p;
-		usleep(100);
-	}
 }
 
 void debug(const char* format, ...)
@@ -676,16 +333,11 @@ int main(int argc, char *argv[])
 
 	setupPins();
 
-	setupSPI(SPI_CHANNEL);
-
-    int minDelay = 10;//
-    int maxDelay = 1000;//
+    int minDelay = 100;//
+    int maxDelay = 10000;//
     int mode = 0; //
 
-    int steps = 0;
     int waitTime = 0;
-
-    int direction = 1;
 
     struct TestParams params;
 
@@ -722,17 +374,9 @@ int main(int argc, char *argv[])
 			{
 				selectedDevice = atoi(argv[i+1]);
 			}
-			if(strcmp(argv[i], "-steps") == 0)
-			{
-				steps = atoi(argv[i+1]);
-			}
 			if(strcmp(argv[i], "-delay") == 0)
 			{
 				waitTime = atoi(argv[i+1]);
-			}
-			if(strcmp(argv[i], "-dir") == 0)
-			{
-				direction = atoi(argv[i+1]);
 			}
 			if(strcmp(argv[i], "-event") == 0)
 			{
@@ -761,7 +405,6 @@ int main(int argc, char *argv[])
 	debug("| test iterations       | %d\n", g_testIterations);
 	debug("| button code           | %d\n", g_iButtonCode);
 	debug("| selected device       | %d\n", selectedDevice);
-	debug("| steps                 | %d\n", steps);
 	debug("| wait time             | %d\n", waitTime);
 	debug("+----------------------------------+\n");
 
@@ -797,107 +440,10 @@ int main(int argc, char *argv[])
 
 	/*
 	 * run the selected mode:
-	 * 0 - stepper mode
-	 * 1 - stepper latency test
-	 * 2 - reset stepper
 	 * 3 - automode
-	 * 4 - pressure sensor test mode
 	 */
 	switch(mode)
 	{
-		case 0:
-			// stepper mode: use a stepper motor to physically push a button
-
-			debug("### stepper mode ###\n");
-
-			if(g_testIterations == 0)
-			{
-				debug("invalid number of test iterations (%d) [has to be at least 1] - aborting\n", g_testIterations);
-				return 0;
-			}
-
-			start();
-			initializeStepper(200, 6, 5);
-			setStepperRPM(sm_RPM);
-
-			// set test params to for logging
-			params.mode = 0;
-			params.iterations = g_testIterations;
-			params.buttonCode = g_iButtonCode;
-			if(customDeviceNameSet) sprintf(params.device, "%s", customDeviceName);
-			else sprintf(params.device, "%s", g_szDeviceName);
-			params.waitTime = waitTime;
-
-			calibrateStepper();
-
-			struct StepperModeResult *sm_result = (void*) malloc(g_testIterations * sizeof(struct StepperModeResult));
-
-			struct PressureData* pressureData = (void*)malloc(10000000 * sizeof(struct PressureData));
-			pthread_t pressureThread = startPressureMeasurement(pressureData);
-
-			stepperMode(g_testIterations, waitTime, sm_result);
-
-			pthread_cancel(pressureThread);
-
-			logStepperModeData(params, sm_result, g_testIterations);
-			logPressureData(params, pressureData, 10000000);
-
-			debug("%d latencies in microseconds:\n", g_testIterations);
-			for(int i = 0; i < g_testIterations; i++)
-			{
-				printf("%d, %lld, %lld, %lld\n", sm_result[i].stepsMoved, sm_result[i].startTime, sm_result[i].endTime, sm_result[i].usbTime);
-			}
-
-			free(pressureData);
-			free(sm_result);
-			break;
-		case 1:
-			// stepper latency test mode: test how long the stepper takes to move n steps
-			debug("### stepper latency test mode ###\n");
-
-			if(g_testIterations == 0)
-			{
-				debug("invalid number of test iterations (%d) [has to be at least 1] - aborting\n", g_testIterations);
-				return 0;
-			}
-			if(steps < 2)
-			{
-				debug("invalid number of steps (%d) [has to be at least 2] - aborting\n", steps);
-				return 0;
-			}
-
-			start();
-			initializeStepper(200, 6, 5);
-			setStepperRPM(sm_RPM);
-			long long *sl_result = (void*) malloc(g_testIterations * sizeof(long long));
-
-			params.mode = 1;
-			params.iterations = g_testIterations;
-			params.waitTime = waitTime;
-			params.steps = steps;
-
-			measureStepperLatency(steps, g_testIterations, waitTime, sl_result);
-
-			debug("%d stepper latencies in microseconds:\n", g_testIterations);
-			for(int i = 0; i < g_testIterations; i++)
-			{
-				printf("%lld\n", sl_result[i]);
-			}
-
-			free(sl_result);
-			break;
-		case 2:
-			// reset stepper mode: stepper will go upwards until you cancel the program
-			debug("### reset stepper mode ###\n");
-			start();
-			initializeStepper(200, 6, 5);
-			setStepperRPM(sm_RPM);
-
-			while(1)
-			{
-				rotateStepper(10 * direction);
-			}
-			break;
 		case 3:
 			// auto mode: short a button on the input device via a optocoupler connected to a GPIO-pin
 			// we used this mode for LagBox 1.0
@@ -924,52 +470,11 @@ int main(int argc, char *argv[])
 
 			logAutoModeData(params, resultData, g_testIterations);
 
-            printf(params.device);
+            printf("%s\n", params.device);
+            printf("done\n");
 
 			free(resultData);
 			free(delayList);
-
-			break;
-		case 4:
-			// pressure sensor test mode
-			debug("### pressure sensor test mode ###\n");
-
-			struct PressureData* pData = (void*)malloc(1000000 * sizeof(struct PressureData));
-
-			start();
-			initializeStepper(200, 6, 5);
-			setStepperRPM(sm_RPM);
-			
-			printf("starting thread\n");
-
-			pthread_t pThread = startPressureMeasurement(pData);
-
-
-			for(int i = 0; i < g_testIterations;i++ ) {
-				rotateStepper(10*direction);
-			}
-
-			//while(1)
-			//{
-			//	rotateStepper(10 * direction);
-			//}
-
-			printf("ending thread\n");
-
-			pthread_cancel(pThread);
-
-			printf("output...\n");
-
-			for(uint32_t i = 0; i < 1000000; i++)
-			{
-				if(pData[i].timestamp == 0) break;
-				printf("%d - %lld - %d\n", i, pData[i].timestamp, pData[i].pressure);
-				// csv output here
-			}
-
-			free(pData);
-
-			printf("ending...\n");
 
 			break;
 	}
