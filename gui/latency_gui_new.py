@@ -510,8 +510,8 @@ class LatencyGUI(QtWidgets.QWizard):
                 '#date:;': '#date:;' + datetime.today().strftime('%d-%m-%Y'),
                 '#bInterval:;': '#bInterval:;' + str(self.get_device_bInterval()),
                 '#deviceType:;': '#deviceType:;' + str(self.device_type),
-                '#EAN:;': '#EAN:;' + self.ui.lineEdit_ean_upc.text()
-                # '#deviceSpeed:;': '#deviceSpeed:;' + self.device_speed
+                '#EAN:;': '#EAN:;' + self.ui.lineEdit_ean_upc.text(),
+                '#deviceSpeed:;': '#deviceSpeed:;' + self.device_speed
             }
 
         new_rows = []  # a holder for our modified rows when we make them
