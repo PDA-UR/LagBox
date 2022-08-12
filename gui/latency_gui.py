@@ -228,7 +228,14 @@ class LatencyGUI(QtWidgets.QWizard):
         if int(line_id) == Constants.NUM_TEST_ITERATIONS:
             self.ui.label_press_button_again.setText('Measurement finished. Analysing and saving data...')
 
+    def reset_page_three(self):
+        self.ui.label_press_button_again.setText("Press the button of your device one more time to start the measurement")
+        self.ui.progressBar.setValue(0)
+        self.ui.label_progress.setText("0/100")
+        self.ui.label_last_measured_time.setText("0.0ms")
+
     def thread_finished(self):
+        self.reset_page_three()
         print('Thread finished')
 
     @pyqtSlot('QString')
@@ -260,20 +267,21 @@ class LatencyGUI(QtWidgets.QWizard):
 
     # User interface for page five (Page that askes the user if he wants to upload the measurements)
     def init_ui_page_five(self):
-        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Continue to Upload Results')
+        self.ui.setButtonText(QtWidgets.QWizard.NextButton, 'Upload Results')
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_five)
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.connect(self.init_ui_page_six)
 
-        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Exit application without uploading results')
+        self.ui.setButtonText(QtWidgets.QWizard.CancelButton, 'Exit without uploading')
 
         #TODO: Add custom button to restart the application to conduct a new measurement
-        #self.setOption(QtWidgets.QWizard.HaveCustomButton1, True)
-        #self.ui.setButtonText(QtWidgets.QWizard.CustomButton1, 'Start a new measurement without uploading results')
-        #self.button(QtWidgets.QWizard.CustomButton1).clicked.connect(self.restart_application)
+        self.setOption(QtWidgets.QWizard.HaveCustomButton1, True)
+        self.ui.setButtonText(QtWidgets.QWizard.CustomButton1, 'Restart without uploading')
+        self.button(QtWidgets.QWizard.CustomButton1).clicked.connect(self.restart_application)
 
     def restart_application(self):
         self.ui.button(QtWidgets.QWizard.NextButton).clicked.disconnect(self.init_ui_page_six)
         self.setOption(QtWidgets.QWizard.HaveCustomButton1, False)
+        self.reset_all_data()
         self.init_ui_page_one()
         QtWidgets.QWizard.restart(self)
 
