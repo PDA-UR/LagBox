@@ -19,7 +19,7 @@
 #define CHANNEL_BUTTON_RIGHT 4
 #define SPI_CHANNEL 0
 
-#define PIN_AUTO_MODE 11 //pin used for auto-mode
+#define PIN_AUTO_MODE 21 //pin used for auto-mode
 #define POLARITY_THRESHOLD 500 //Threshold for checking the logic of a game-pad
 
 #define	AF_BASE		100

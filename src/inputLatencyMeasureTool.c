@@ -36,10 +36,12 @@
 #include <pthread.h>
 #include <math.h>
 
+// apt install libgpiod
+#include <gpiod.h>
+
 // Project includes
 #include "inputLatencyMeasureTool.h"
 #include "joystickControl.h"
-#include <wiringPi.h>
 #include "fileLog.h"
 
 enum INPUT_DEVICES inputDevice;
@@ -56,6 +58,10 @@ const char* DEVICE_TYPES[3] = {
 	"Mouse",
 	"Keyboard"
 };
+
+const char *chipname = "gpiochip0";
+struct gpiod_chip *chip;
+struct gpiod_line *lineAutoMode;
 
 int g_iChannelCircId = -1;
 int g_iButtonCode = 0; // ID of GP button which will be tested
@@ -98,7 +104,7 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 	for (int i = 0; i < iterations; i++)
 	{
 		debug("iteration %d \n", i);
-		digitalWrite(PIN_AUTO_MODE, LOW);
+		gpiod_line_set_value(PIN_AUTO_MODE, 0);
 		
 
 		while (1)
@@ -116,7 +122,7 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 		usleep(delayList[i]);
 
 		dStartTime = getCurTime_microseconds(CLOCK_REALTIME); 
-		digitalWrite(PIN_AUTO_MODE, HIGH);
+		gpiod_line_set_value(PIN_AUTO_MODE, 1);
 
 		while (1)
 		{
@@ -134,7 +140,7 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 
 				results[i] = data;
 
-				//digitalWrite(PIN_AUTO_MODE, LOW); //clear pin
+				//gpiod_line_set_value(PIN_AUTO_MODE, 0);; //clear pin
 				break;
 			}
 
@@ -148,7 +154,7 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 		usleep(10);
 	}
 
-	digitalWrite(PIN_AUTO_MODE, LOW);
+	gpiod_line_set_value(PIN_AUTO_MODE, 0);
 }
 
 int checkButtonState(long long* timestamp)
@@ -254,9 +260,9 @@ void testPin(int pin)
 {
 	for(int i = 0; i < 1000; i++)
 	{
-		digitalWrite(pin, HIGH);
+		gpiod_line_set_value(pin, 1);
 		usleep(1000000);
-		digitalWrite(pin, LOW);
+		gpiod_line_set_value(pin, 0);
 		usleep(1000000);
 	}
 }
@@ -264,8 +270,10 @@ void testPin(int pin)
 void setupPins()
 {
 	debug("setting up pins...\n");
-	pinMode(PIN_AUTO_MODE, OUTPUT);
-	digitalWrite(PIN_AUTO_MODE, LOW);
+
+	lineAutoMode = gpiod_chip_get_line(chip, PIN_AUTO_MODE);
+	gpiod_line_request_output(PIN_AUTO_MODE, "foo", 0);
+	gpiod_line_set_value(PIN_AUTO_MODE, 1);
 }
 
 // swap array elements
@@ -329,7 +337,9 @@ int main(int argc, char *argv[])
 {
 	srand(time(NULL));
 
-	wiringPiSetup();
+	// wiringPiSetup();
+  	// Open GPIO chip
+  	chip = gpiod_chip_open_by_name(chipname);
 
 	setupPins();
 
