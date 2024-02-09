@@ -2,6 +2,8 @@
 #define inputLatencyMeasureTool_h__
 
 #include <pthread.h>
+#include <gpiod.h>
+
 
 // Defines
 // MCP Params

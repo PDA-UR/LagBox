@@ -104,7 +104,7 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 	for (int i = 0; i < iterations; i++)
 	{
 		debug("iteration %d \n", i);
-		gpiod_line_set_value(PIN_AUTO_MODE, 0);
+		gpiod_line_set_value(lineAutoMode, 0);
 		
 
 		while (1)
@@ -122,7 +122,7 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 		usleep(delayList[i]);
 
 		dStartTime = getCurTime_microseconds(CLOCK_REALTIME); 
-		gpiod_line_set_value(PIN_AUTO_MODE, 1);
+		gpiod_line_set_value(lineAutoMode, 1);
 
 		while (1)
 		{
@@ -140,7 +140,7 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 
 				results[i] = data;
 
-				//gpiod_line_set_value(PIN_AUTO_MODE, 0);; //clear pin
+				//gpiod_line_set_value(lineAutoMode, 0); //clear pin
 				break;
 			}
 
@@ -154,7 +154,7 @@ void autoMode(struct AutoModeData *results, unsigned int iterations)
 		usleep(10);
 	}
 
-	gpiod_line_set_value(PIN_AUTO_MODE, 0);
+	gpiod_line_set_value(lineAutoMode, 0);
 }
 
 int checkButtonState(long long* timestamp)
@@ -260,9 +260,9 @@ void testPin(int pin)
 {
 	for(int i = 0; i < 1000; i++)
 	{
-		gpiod_line_set_value(pin, 1);
+		gpiod_line_set_value(lineAutoMode, 1);
 		usleep(1000000);
-		gpiod_line_set_value(pin, 0);
+		gpiod_line_set_value(lineAutoMode, 0);
 		usleep(1000000);
 	}
 }
@@ -272,8 +272,8 @@ void setupPins()
 	debug("setting up pins...\n");
 
 	lineAutoMode = gpiod_chip_get_line(chip, PIN_AUTO_MODE);
-	gpiod_line_request_output(PIN_AUTO_MODE, "foo", 0);
-	gpiod_line_set_value(PIN_AUTO_MODE, 1);
+	gpiod_line_request_output(lineAutoMode, "foo", 0);
+	gpiod_line_set_value(lineAutoMode, 1);
 }
 
 // swap array elements
@@ -335,9 +335,9 @@ void debug(const char* format, ...)
 
 int main(int argc, char *argv[])
 {
+	printf("foo");
 	srand(time(NULL));
 
-	// wiringPiSetup();
   	// Open GPIO chip
   	chip = gpiod_chip_open_by_name(chipname);
 
